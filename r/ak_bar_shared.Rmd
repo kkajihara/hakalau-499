@@ -1,0 +1,296 @@
+---
+title: "ak_bar_shared"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+# isolate asvs shared by all
+ak_shared_asvs <- rownames(ak_bar_df)[ak_bar_df$`Kolea root`!=0 &
+                                            ak_bar_df$`Grass root`!=0 &
+                                            ak_bar_df$`Koa root`!=0 &
+                                            ak_bar_df$`Akala root`!=0 &
+                                            ak_bar_df$`Ohia root`!=0 &
+                                            ak_bar_df$`Olapa root`!=0 &
+                                            ak_bar_df$Soil!=0]
+
+
+```
+
+
+
+## shared Kolea
+
+```{r}
+
+# make new ak df with shared shared host asvs
+ak_shared_kolea_df <- ak_bar_df[rownames(ak_bar_df) %in% ak_shared_asvs,]
+
+# make asv rownames into a column
+ak_shared_kolea_df <- ak_shared_kolea_df %>% rownames_to_column('ASV')
+
+# make a new df with asv names and host sample asv counts as columns
+ak_kolea_shared_df <- ak_shared_kolea_df %>% select(ASV, `Kolea root`)
+
+# take sum of all shared host sample sequences
+ak_kolea_sum <- sum(ak_bar_df$`Kolea root`)
+
+# make new relative abundance column by dividing shared count by total
+ak_kolea_shared_df <- ak_kolea_shared_df %>% mutate(rel_abun = ((`Kolea root` / ak_kolea_sum) * 100))
+
+# make new column taking family from tax_table where asv names match in both dfs
+ak_kolea_shared_df$family <- ak_tax_table_df$Family[match(ak_kolea_shared_df$ASV, ak_tax_table_df$ASV)]
+
+# make new column with host name filling all cells
+ak_kolea_shared_df$Sample <- rep("Kolea root", nrow(ak_kolea_shared_df))
+
+# change host colname for future rbind
+colnames(ak_kolea_shared_df)[2] <- "Count"
+
+
+```
+
+
+## shared grass
+
+```{r}
+
+# make new ak df with shared shared host asvs
+ak_shared_grass_df <- ak_bar_df[rownames(ak_bar_df) %in% ak_shared_asvs,]
+
+# make asv rownames into a column
+ak_shared_grass_df <- ak_shared_grass_df %>% rownames_to_column('ASV')
+
+# make a new df with asv names and host sample asv counts as columns
+ak_grass_shared_df <- ak_shared_grass_df %>% select(ASV, `Grass root`)
+
+# take sum of all shared host sample sequences
+ak_grass_sum <- sum(ak_bar_df$`Grass root`)
+
+# make new relative abundance column by dividing shared count by total
+ak_grass_shared_df <- ak_grass_shared_df %>% mutate(rel_abun = ((`Grass root` / ak_grass_sum) * 100))
+
+# make new column taking family from tax_table where asv names match in both dfs
+ak_grass_shared_df$family <- ak_tax_table_df$Family[match(ak_grass_shared_df$ASV, ak_tax_table_df$ASV)]
+
+# make new column with host name filling all cells
+ak_grass_shared_df$Sample <- rep("Grass root", nrow(ak_grass_shared_df))
+
+# change host colname for future rbind
+colnames(ak_grass_shared_df)[2] <- "Count"
+
+```
+
+
+## shared koa
+
+```{r}
+
+
+# make new ak df with shared shared host asvs
+ak_shared_koa_df <- ak_bar_df[rownames(ak_bar_df) %in% ak_shared_asvs,]
+
+# make asv rownames into a column
+ak_shared_koa_df <- ak_shared_koa_df %>% rownames_to_column('ASV')
+
+# make a new df with asv names and host sample asv counts as columns
+ak_koa_shared_df <- ak_shared_koa_df %>% select(ASV, `Koa root`)
+
+# take sum of all shared host sample sequences
+ak_koa_sum <- sum(ak_bar_df$`Koa root`)
+
+# make new relative abundance column by dividing shared count by total
+ak_koa_shared_df <- ak_koa_shared_df %>% mutate(rel_abun = ((`Koa root` / ak_koa_sum) * 100))
+
+# make new column taking family from tax_table where asv names match in both dfs
+ak_koa_shared_df$family <- ak_tax_table_df$Family[match(ak_koa_shared_df$ASV, ak_tax_table_df$ASV)]
+
+# make new column with host name filling all cells
+ak_koa_shared_df$Sample <- rep("Koa root", nrow(ak_koa_shared_df))
+
+# change host colname for future rbind
+colnames(ak_koa_shared_df)[2] <- "Count"
+
+
+```
+
+
+## shared akala
+
+```{r}
+
+# make new ak df with shared shared host asvs
+ak_shared_akala_df <- ak_bar_df[rownames(ak_bar_df) %in% ak_shared_asvs,]
+
+# make asv rownames into a column
+ak_shared_akala_df <- ak_shared_akala_df %>% rownames_to_column('ASV')
+
+# make a new df with asv names and host sample asv counts as columns
+ak_akala_shared_df <- ak_shared_akala_df %>% select(ASV, `Akala root`)
+
+# take sum of all shared host sample sequences
+ak_akala_sum <- sum(ak_bar_df$`Akala root`)
+
+# make new relative abundance column by dividing shared count by total
+ak_akala_shared_df <- ak_akala_shared_df %>% mutate(rel_abun = ((`Akala root` / ak_akala_sum) * 100))
+
+# make new column taking family from tax_table where asv names match in both dfs
+ak_akala_shared_df$family <- ak_tax_table_df$Family[match(ak_akala_shared_df$ASV, ak_tax_table_df$ASV)]
+
+# make new column with host name filling all cells
+ak_akala_shared_df$Sample <- rep("Akala root", nrow(ak_akala_shared_df))
+
+# change host colname for future rbind
+colnames(ak_akala_shared_df)[2] <- "Count"
+
+```
+
+
+## shared ohia
+
+```{r}
+
+# make new ak df with shared shared host asvs
+ak_shared_ohia_df <- ak_bar_df[rownames(ak_bar_df) %in% ak_shared_asvs,]
+
+# make asv rownames into a column
+ak_shared_ohia_df <- ak_shared_ohia_df %>% rownames_to_column('ASV')
+
+# make a new df with asv names and host sample asv counts as columns
+ak_ohia_shared_df <- ak_shared_ohia_df %>% select(ASV, `Ohia root`)
+
+# take sum of all shared host sample sequences
+ak_ohia_sum <- sum(ak_bar_df$`Ohia root`)
+
+# make new relative abundance column by dividing shared count by total
+ak_ohia_shared_df <- ak_ohia_shared_df %>% mutate(rel_abun = ((`Ohia root` / ak_ohia_sum) * 100))
+
+# make new column taking family from tax_table where asv names match in both dfs
+ak_ohia_shared_df$family <- ak_tax_table_df$Family[match(ak_ohia_shared_df$ASV, ak_tax_table_df$ASV)]
+
+# make new column with host name filling all cells
+ak_ohia_shared_df$Sample <- rep("Ohia root", nrow(ak_ohia_shared_df))
+
+# change host colname for future rbind
+colnames(ak_ohia_shared_df)[2] <- "Count"
+
+```
+
+
+## shared olapa
+
+```{r}
+
+# make new ak df with shared shared host asvs
+ak_shared_olapa_df <- ak_bar_df[rownames(ak_bar_df) %in% ak_shared_asvs,]
+
+# make asv rownames into a column
+ak_shared_olapa_df <- ak_shared_olapa_df %>% rownames_to_column('ASV')
+
+# make a new df with asv names and host sample asv counts as columns
+ak_olapa_shared_df <- ak_shared_olapa_df %>% select(ASV, `Olapa root`)
+
+# take sum of all shared host sample sequences
+ak_olapa_sum <- sum(ak_bar_df$`Olapa root`)
+
+# make new relative abundance column by dividing shared count by total
+ak_olapa_shared_df <- ak_olapa_shared_df %>% mutate(rel_abun = ((`Olapa root` / ak_olapa_sum) * 100))
+
+# make new column taking family from tax_table where asv names match in both dfs
+ak_olapa_shared_df$family <- ak_tax_table_df$Family[match(ak_olapa_shared_df$ASV, ak_tax_table_df$ASV)]
+
+# make new column with host name filling all cells
+ak_olapa_shared_df$Sample <- rep("Olapa root", nrow(ak_olapa_shared_df))
+
+# change host colname for future rbind
+colnames(ak_olapa_shared_df)[2] <- "Count"
+
+```
+
+
+## shared soil
+
+```{r}
+
+# make new ak df with shared shared host asvs
+ak_shared_soil_df <- ak_bar_df[rownames(ak_bar_df) %in% ak_shared_asvs,]
+  
+# make asv rownames into a column
+ak_shared_soil_df <- ak_shared_soil_df %>% rownames_to_column('ASV')
+
+# make a new df with asv names and host sample asv counts as columns
+ak_soil_shared_df <- ak_shared_soil_df %>% select(ASV, `Soil`)
+
+# take sum of all shared host sample sequences
+ak_soil_sum <- sum(ak_bar_df$`Soil`)
+
+# make new relative abundance column by dividing shared count by total
+ak_soil_shared_df <- ak_soil_shared_df %>% mutate(rel_abun = ((`Soil` / ak_soil_sum) * 100))
+
+# make new column taking family from tax_table where asv names match in both dfs
+ak_soil_shared_df$family <- ak_tax_table_df$Family[match(ak_soil_shared_df$ASV, ak_tax_table_df$ASV)]
+
+# make new column with host name filling all cells
+ak_soil_shared_df$Sample <- rep("Soil", nrow(ak_soil_shared_df))
+
+# change host colname for future rbind
+colnames(ak_soil_shared_df)[2] <- "Count"
+
+```
+
+
+## sums for bar labels
+
+```{r}
+
+ak_shared_rbind_sums <- ak_total_shared_rbind
+
+ak_shared_rbind_sums <- ak_shared_rbind_sums %>% group_by(Sample) %>% summarise(count=length(unique(ASV)), abund=sum(rel_abun))
+
+```
+
+
+
+## rbind
+
+```{r}
+
+ak_total_shared_rbind <- do.call("rbind", list(ak_kolea_shared_df,
+                                        ak_grass_shared_df,
+                                        ak_koa_shared_df,
+                                        ak_akala_shared_df,
+                                        ak_ohia_shared_df,
+                                        ak_olapa_shared_df,
+                                        ak_soil_shared_df))
+
+ak_shared_bar <- ggplot(ak_total_shared_rbind, aes(x=Sample, fill=family, y=rel_abun)) +
+  geom_bar(stat="identity", position="stack") +
+  theme(axis.text.x = element_text(angle=90, size=14, colour="black", vjust=0.5, hjust=1, face="bold"), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_blank(),
+        axis.line = element_line(colour="gray"),
+        axis.title.y = element_text(size=16, face="bold"),
+        legend.title = element_text(size=16, face="bold"),
+        legend.text = element_text(size=12, face="bold", colour="black"),
+        axis.text.y = element_text(colour="black", size=12, face="bold")) +
+  ylim(0,100) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  labs(x = "", y = "Relative Abundance (%)", fill="Family") +
+  scale_fill_manual(values = c("Acaulosporaceae" = "#9e0142",
+                               "Ambisporaceae" = "#d53e4f",
+                               "Archaeosporaceae" = "#f46d43",
+                               "Claroideoglomeraceae" = "#fdae61",
+                               "Gigasporaceae" = "#abdda4",
+                               "Glomeraceae" = "#66c2a5",
+                               "Glomeromycotina" = "#3288bd",
+                               "Paraglomeraceae" = "#5e4fa2"))
+
+```
+
+
+
+
+
