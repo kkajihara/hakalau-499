@@ -1,0 +1,89 @@
+---
+title: "nmds"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## AK 
+
+```{r}
+
+ak_nmds_mat <- t(ak_skookag_mat)
+
+ak_nmds_mat <- as.data.frame(ak_nmds_mat)
+
+ak_nmds_mat <- ak_nmds_mat %>% rownames_to_column('Sample') %>%
+  add_column(habitat = rep("AK", nrow(ak_nmds_mat)), .after = 1)
+
+```
+
+
+## RO
+
+```{r}
+
+ro_nmds_mat <- t(ro_skookag_mat)
+
+ro_nmds_mat <- as.data.frame(ro_nmds_mat)
+
+ro_nmds_mat <- ro_nmds_mat %>% rownames_to_column('Sample') %>%
+  add_column(habitat = rep("RO", nrow(ro_nmds_mat)), .after = 1)
+
+```
+
+## rbind
+
+```{r}
+
+nmds_mat <- rbind.fill(ak_nmds_mat, ro_nmds_mat)
+
+nmds_mat[is.na(nmds_mat)] <- 0
+
+```
+
+
+## nmds
+
+```{r}
+
+nmds_abun <- nmds_mat[,3:ncol(nmds_mat)]
+
+nmds_abun <- as.matrix(nmds_abun)
+
+set.seed(123)
+nmds <- metaMDS(nmds_abun, distance = "bray")
+
+
+data_scores <- as.data.frame(scores(nmds))
+
+data_scores$Sample <- nmds_mat$Sample
+
+data_scores$Habitat <- nmds_mat$habitat
+
+
+nmds_plot <- ggplot(data_scores, aes(x = NMDS1, y = NMDS2)) + 
+    geom_point(size = 4, aes( shape = Habitat, colour = Sample))+ 
+    theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
+    axis.text.x = element_text(colour = "black", face = "bold", size = 12), 
+    legend.text = element_text(size = 12, face ="bold", colour ="black"), 
+    legend.position = "right", axis.title.y = element_text(face = "bold", size = 14), 
+    axis.title.x = element_text(face = "bold", size = 14, colour = "black"), 
+    legend.title = element_text(size = 14, colour = "black", face = "bold"), 
+    panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+    legend.key=element_blank()) + 
+    labs(x = "NMDS1", colour = "Sample", y = "NMDS2", shape = "Habitat")  + 
+    scale_fill_brewer(palette = "Spectral")
+
+
+```
+
+
+
+
+
+
+
+
