@@ -48,8 +48,8 @@ sample_data(unrarefied_physeq)$NewSampleType <- sample_data(sd_df)$NewSampleType
 ```{r}
 
 # Failed function
-#subset_and_prune <- function(physeq, sample_type) {
-Subset samples by provided sample type (Soil, Koa root, etc.)
+subset_and_prune <- function(physeq, sample_type) {
+#Subset samples by provided sample type (Soil, Koa root, etc.)
   subset_physeq <- subset_samples(physeq, NewSampleType==as.character(sample_type))
   # Remove empty taxa
   subset_physeq <- prune_taxa(taxa_sums(subset_physeq) > 0, subset_physeq)
@@ -176,6 +176,14 @@ pilo_rowsums <- rowSums(otu_table(merged_pilo_plot))
 
 # min grass = 15042
 grass_rowsums <- rowSums(otu_table(merged_grass_plot))
+
+hist(c(koa_rowsums,
+       ohia_rowsums,
+       olapa_rowsums,
+       kolea_rowsums,
+       akala_rowsums,
+       pilo_rowsums,
+       grass_rowsums))
 
 
 ```

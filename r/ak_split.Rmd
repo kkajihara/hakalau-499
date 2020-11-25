@@ -34,8 +34,8 @@ ak_olapa <- prune_taxa(taxa_sums(ak_olapa) > 0, ak_olapa)
 ak_akala <- subset_samples(rarefied_akala, grepl("AK", sample_names(rarefied_akala)))
 ak_akala <- prune_taxa(taxa_sums(ak_akala) > 0, ak_akala)
 
-ak_pilo <- subset_samples(rarefied_pilo, grepl("AK", sample_names(rarefied_pilo)))
-ak_pilo <- prune_taxa(taxa_sums(ak_pilo) > 0, ak_pilo)
+#ak_pilo <- subset_samples(rarefied_pilo, grepl("AK", sample_names(rarefied_pilo)))
+#ak_pilo <- prune_taxa(taxa_sums(ak_pilo) > 0, ak_pilo)
 
 ak_grass <- subset_samples(rarefied_grass, grepl("AK", sample_names(rarefied_grass)))
 ak_grass <- prune_taxa(taxa_sums(ak_grass) > 0, ak_grass)
@@ -65,7 +65,7 @@ ak_kolea_mat <- make_matrix(ak_kolea)
 ak_ohia_mat <- make_matrix(ak_ohia)
 ak_olapa_mat <- make_matrix(ak_olapa)
 ak_akala_mat <- make_matrix(ak_akala)
-ak_pilo_mat <- make_matrix(ak_pilo)
+#ak_pilo_mat <- make_matrix(ak_pilo)
 ak_grass_mat <- make_matrix(ak_grass)
 
 
@@ -87,7 +87,7 @@ colnames(ak_kolea_mat) <- c("Kolea root")
 
 colnames(ak_akala_mat) <- c("Akala root")
 
-colnames(ak_pilo_mat) <- c("Pilo root")
+#colnames(ak_pilo_mat) <- c("Pilo root")
 
 colnames(ak_grass_mat) <- c("Grass root")
 
@@ -129,18 +129,18 @@ rownames(ak_skooka_mat) <- ak_skooka_mat[,1]
 ak_skooka_mat[,1] <- NULL
 
 #Add pilo
-ak_skookap_mat <- merge(ak_skooka_mat, ak_pilo_mat, by="row.names", all=T)
-rownames(ak_skookap_mat) <- ak_skookap_mat[,1]
-ak_skookap_mat[,1] <- NULL
+#ak_skookap_mat <- merge(ak_skooka_mat, ak_pilo_mat, by="row.names", all=T)
+#rownames(ak_skookap_mat) <- ak_skookap_mat[,1]
+#ak_skookap_mat[,1] <- NULL
 
 #Add grass
-ak_skookapg_mat <- merge(ak_skookap_mat, ak_grass_mat, by="row.names", all=T)
-rownames(ak_skookapg_mat) <- ak_skookapg_mat[,1]
-ak_skookapg_mat[,1] <- NULL
+ak_skookag_mat <- merge(ak_skooka_mat, ak_grass_mat, by="row.names", all=T)
+rownames(ak_skookag_mat) <- ak_skookag_mat[,1]
+ak_skookag_mat[,1] <- NULL
 
 
-ak_skookapg_mat$`Pilo root` <- NULL
-ak_skookag_mat <- ak_skookapg_mat
+#ak_skookapg_mat$`Pilo root` <- NULL
+#ak_skookag_mat <- ak_skookapg_mat
 
 # Changes NAs to 0
 ak_skookag_mat[is.na(ak_skookag_mat)] <- 0
@@ -160,6 +160,7 @@ ak_skookag_mat_pa[is.na(ak_skookag_mat_pa)] <- 0
 ak_skookag_mat_pa[ak_skookag_mat_pa > 0] <- 1
 
 
+# fiddling around to see where zero rows are coming from
 ak_skookag_mat$sum <- rowSums(ak_skookag_mat)
 t_ak_skookag <- t(ak_skookag_mat)
 t_ak_skookag <- as.data.frame(t_ak_skookag)
@@ -180,36 +181,15 @@ ak_skooka_mat$sum <- rowSums(ak_skooka_mat)
 
 ```{r}
 
-# rows to factors
-
-ak_skookag_mat_pct <- ak_skookag_mat_pa
-
-ak_factors <- apply(ak_skookag_mat_pct, 1, paste, collapse="/")
-
-ak_skookag_mat_pct$Factor <- factor(ak_factors, labels=1:length(unique(ak_factors)))
-
-
-ak_skookag_mat_pct <- ak_skookag_mat_pct %>% nest(data=c(Soil, `Grass root`, `Koa root`, `Kolea root`, `Ohia root`, `Olapa root`))
-
-ak_skookag_mat_pct <- ak_skookag_mat_pct %>% mutate(hosts = sapply(data, function(x) paste0(sort(x), collapse="-")))
-
-ak_skookag_mat_pct <- ak_skookag_mat_pct %>%
-  rownames_to_column('ASV') %>%
-  gakup_by(Factor, ASV) %>% 
-  summarise(n=n())
-
-ak_skookag_mat_pct$pct <- ak
-
-
-# Upset Plot
+# Upset Plot using ggupset (didn't work)
 
 ak_skookag_mat_pct %>%
   ggplot(aes(x=data)) +
   geom_bar() +
   scale_x_upset()
 
-
 ```
+
 
 
 ```{r}
@@ -256,6 +236,7 @@ upset(
 
 
 ```
+
 
 
 ## Euler 
@@ -345,11 +326,11 @@ alt_ak_spread_scores <- colSums(alt_ak_nest_mat)
 
 # assign each ASV a weighted score based on its presence in different sample types
 # lower sample types get a higher score to give figure a right-aligned nested structure
-ak_rank_scores <- apply(alt_ak_nest_mat, MARGIN=2, function(x) sum(x * rev(seq_along(x))))
+alt_ak_rank_scores <- apply(alt_ak_nest_mat, MARGIN=2, function(x) sum(x * rev(seq_along(x))))
 
-ak_composite_score <- data.table(OTU_ID = names(ak_spread_scores),
-                              spread_score = ak_spread_scores,
-                              rank_score = ak_rank_scores)
+ak_composite_score <- data.table(OTU_ID = names(alt_ak_spread_scores),
+                              spread_score = alt_ak_spread_scores,
+                              rank_score = alt_ak_rank_scores)
 
 ak_composite_score <- ak_composite_score[order(rank_score, spread_score)]
 
@@ -357,7 +338,7 @@ ak_asv_order <- ak_composite_score$OTU_ID
 
 alt_ak_nest_mat <- alt_ak_nest_mat[, ak_asv_order]
 
-alt_ak_nest <- heatmap(alt_ak_nest_mat, Colv=NA, rowv=NA, labCol=NA, margins = c(5,5))
+alt_ak_nest <- heatmap(alt_ak_nest_mat, Colv=NA, Rowv=NA, labCol=NA, margins = c(5,5))
 
 
 ```

@@ -29,8 +29,8 @@ ro_olapa <- prune_taxa(taxa_sums(ro_olapa) > 0, ro_olapa)
 ro_akala <- subset_samples(rarefied_akala, grepl("RO", sample_names(rarefied_akala)))
 ro_akala <- prune_taxa(taxa_sums(ro_akala) > 0, ro_akala)
 
-ro_pilo <- subset_samples(rarefied_pilo, grepl("RO", sample_names(rarefied_pilo)))
-ro_pilo <- prune_taxa(taxa_sums(ro_pilo) > 0, ro_pilo)
+#ro_pilo <- subset_samples(rarefied_pilo, grepl("RO", sample_names(rarefied_pilo)))
+#ro_pilo <- prune_taxa(taxa_sums(ro_pilo) > 0, ro_pilo)
 
 ro_grass <- subset_samples(rarefied_grass, grepl("RO", sample_names(rarefied_grass)))
 ro_grass <- prune_taxa(taxa_sums(ro_grass) > 0, ro_grass)
@@ -48,7 +48,7 @@ ro_kolea_mat <- make_matrix(ro_kolea)
 ro_ohia_mat <- make_matrix(ro_ohia)
 ro_olapa_mat <- make_matrix(ro_olapa)
 ro_akala_mat <- make_matrix(ro_akala)
-ro_pilo_mat <- make_matrix(ro_pilo)
+#ro_pilo_mat <- make_matrix(ro_pilo)
 ro_grass_mat <- make_matrix(ro_grass)
 
 
@@ -70,7 +70,7 @@ colnames(ro_kolea_mat) <- c("Kolea root")
 
 colnames(ro_akala_mat) <- c("Akala root")
 
-colnames(ro_pilo_mat) <- c("Pilo root")
+#colnames(ro_pilo_mat) <- c("Pilo root")
 
 colnames(ro_grass_mat) <- c("Grass root")
 
@@ -111,19 +111,19 @@ rownames(ro_skooka_mat) <- ro_skooka_mat[,1]
 ro_skooka_mat[,1] <- NULL
 
 #Add pilo
-ro_skookap_mat <- merge(ro_skooka_mat, ro_pilo_mat, by="row.names", all=T)
-rownames(ro_skookap_mat) <- ro_skookap_mat[,1]
-ro_skookap_mat[,1] <- NULL
+#ro_skookap_mat <- merge(ro_skooka_mat, ro_pilo_mat, by="row.names", all=T)
+#rownames(ro_skookap_mat) <- ro_skookap_mat[,1]
+#ro_skookap_mat[,1] <- NULL
 
 #Add grass
-ro_skookapg_mat <- merge(ro_skookap_mat, ro_grass_mat, by="row.names", all=T)
-rownames(ro_skookapg_mat) <- ro_skookapg_mat[,1]
-ro_skookapg_mat[,1] <- NULL
+ro_skookag_mat <- merge(ro_skooka_mat, ro_grass_mat, by="row.names", all=T)
+rownames(ro_skookag_mat) <- ro_skookag_mat[,1]
+ro_skookag_mat[,1] <- NULL
 
 
 
-ro_skookapg_mat$`Pilo root` <- NULL
-ro_skookag_mat <- ro_skookapg_mat
+#ro_skookapg_mat$`Pilo root` <- NULL
+#ro_skookag_mat <- ro_skookapg_mat
 
 # Changes NAs to 0
 ro_skookag_mat[is.na(ro_skookag_mat)] <- 0
@@ -137,11 +137,8 @@ ro_skookag_mat[is.na(ro_skookag_mat)] <- 0
 
 ro_skookag_mat_pa <- ro_skookag_mat
 
-# Changes NAs to 0
-ro_skookag_mat[is.na(ro_skookag_mat)] <- 0
-
 # Makes presence absence (turns any value > 0 into 1)
-ro_skookag_mat[ro_skookag_mat > 0] <- 1
+ro_skookag_mat_pa[ro_skookag_mat_pa > 0] <- 1
 
 ```
 
@@ -172,7 +169,7 @@ ro_skookag_mat_pa <- ro_skookag_mat
 # Changes NAs to 0
 ro_skookag_mat_pa[is.na(ro_skookag_mat_pa)] <- 0
 
-# Mroes presence absence (turns any value > 0 into 1)
+# Makes presence absence (turns any value > 0 into 1)
 ro_skookag_mat_pa[ro_skookag_mat_pa > 0] <- 1
 
 
