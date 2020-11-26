@@ -224,3 +224,4 @@ nmds_plot_plot <- ggplot(plot_data_scores, aes(x = NMDS1, y = NMDS2)) +
 
 
 
+
