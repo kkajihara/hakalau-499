@@ -147,47 +147,19 @@ ak_skookag_mat[is.na(ak_skookag_mat)] <- 0
 ```
 
 
-
+## Make presence absence matrix
 
 ```{r}
-ak_skookag_mat_pa <- ak_skookag_mat
 
-# Changes NAs to 0
-ak_skookag_mat_pa[is.na(ak_skookag_mat_pa)] <- 0
+# make copy of abundance matrix for presence absence
+ak_skookag_mat_pa <- ak_skookag_mat
 
 # Makes presence absence (turns any value > 0 into 1)
 ak_skookag_mat_pa[ak_skookag_mat_pa > 0] <- 1
 
 
-# fiddling around to see where zero rows are coming from
-ak_skookag_mat$sum <- rowSums(ak_skookag_mat)
-t_ak_skookag <- t(ak_skookag_mat)
-t_ak_skookag <- as.data.frame(t_ak_skookag)
-
-t_ak_sko <- as.data.frame(t(ak_sko_mat))
-
-which(rowSums(ak_skookag_mat)==0)
-
-t_ak_skooka <- as.data.frame(t(ak_skooka_mat))
-
-ak_skooka_mat$sum <- rowSums(ak_skooka_mat)
-
- filter(ak_skookag_mat, sum==0)
-
 ```
 
-## Convert Presence Absence to Percentages (didn't work)
-
-```{r}
-
-# Upset Plot using ggupset (didn't work)
-
-ak_skookag_mat_pct %>%
-  ggplot(aes(x=data)) +
-  geom_bar() +
-  scale_x_upset()
-
-```
 
 
 
@@ -231,60 +203,17 @@ ak_upset <-
     )
   )
 
-'Intersection_size'=theme(
-        panel.grid.major=element_blank(), 
-        panel.grid.minor=element_blank())
-# another way to convert binary to boolean
-#ak_skookag_boo[ak_skookag_hosts] = ak_skookag_boo[ak_skookag_hosts] == 1 
-
-
 
 
 ```
 
 
 
-## Euler 
-
-```{r}
-
-ak_skookap_euler <- euler(ak_skookap_mat)
-ak_skookap_euler_plot <- plot(ak_skookap_euler, fills=TRUE, quantities=TRUE)
-ak_skookap_euler_plot
-
-```
-
-
-## Testing venn accuracy
-
-```{r}
-
-# Make sure ASVs are row names
-#ak_skookap_df <- t(ak_skookap_mat)
-# Convert matrix to data frame
-ak_skookap_df <- as.data.frame(ak_skookap_df)
-
-# Get names of all ASVs present in akala
-# Venn says 18, what is it actually?
-# This command will take a data frame but not a matrix
-ak_some_present <- rownames(ak_skookap_df)[
-                        ak_skookap_df$Soil==1 &
-                        ak_skookap_df$`Koa root`==0 &
-                        ak_skookap_df$`Ohia root`==0 &
-                        ak_skookap_df$`Olapa root`==0 &
-                        ak_skookap_df$`Kolea root`==1 &
-                        ak_skookap_df$`Pilo root`==0 &
-                        ak_skookap_df$`Akala root`==1 &
-                        ak_skookap_df$`Grass root`==1]
-
-
-ak_all_filtered_physeq <- prune_taxa(ak_all_present, unrarefied_physeq)
-
-
-```
 
 
 ```{r}
+
+# old upset code (using UpSetR)
 upset(ak_skookag_mat_pa, nsets=7, nintersects = NA, sets.x.label = "Total ASVs")
 
 ```
@@ -302,18 +231,8 @@ ak_skookag_mat_nest <- as(ak_skookag_mat_pa, "matrix")
 # Tranpose matrix (flip axes)
 ak_skookag_mat_nest <- t(ak_skookag_mat_nest)
 
-sort(rowSums(ak_skookag_mat_nest))
 
-# Ordered by size
-ak_sample_order <- c("Soil",
-                     "Kolea root",
-                     "Grass root",
-                     "Akala root",
-                    "Olapa root",
-                    "Koa root",
-                    "Ohia root")
-
-# Ordered by what looks to be more nested visually
+# Ordered by what looks to be more nested visually (not by size)
 alt_ak_sample_order <- c("Soil",
                      "Grass root",
                      "Akala root",
@@ -347,6 +266,7 @@ alt_ak_nest <- heatmap(alt_ak_nest_mat, Colv=NA, Rowv=NA, labCol=NA, margins = c
 
 
 ```
+
 
 
 
