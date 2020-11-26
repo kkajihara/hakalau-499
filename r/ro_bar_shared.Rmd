@@ -241,17 +241,6 @@ colnames(ro_soil_shared_df)[2] <- "Count"
 ```
 
 
-## sums for bar labels
-
-```{r}
-
-ro_shared_rbind_sums <- ro_total_shared_rbind
-
-ro_shared_rbind_sums <- ro_shared_rbind_sums %>% group_by(Sample) %>% summarise(count=length(unique(ASV)), abund=sum(rel_abun))
-
-```
-
-
 ## rbind
 
 ```{r}

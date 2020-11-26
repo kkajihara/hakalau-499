@@ -8,9 +8,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-I want to make 2 venns and nestedness, 1 each for AK and ak habitats.
 Take rarefied root physeq objects + soil object.
-Use subset_samples to keep only AK or ak plots.
+Use subset_samples to keep only AK or RO plots.
 
 ## AK Restored
 
@@ -194,6 +193,8 @@ ak_skookag_mat_pct %>%
 
 ```{r}
 
+library(ComplexUpset)
+
 # make a copy of presence absence matrix
 ak_skookag_boo <- ak_skookag_mat_pa
 
@@ -208,7 +209,8 @@ ak_skookag_hosts <- colnames(ak_skookag_boo)
 
 
 # Generate upset plot with percentage labels
-upset(
+ak_upset <- 
+  upset(
   ak_skookag_boo, 
   ak_skookag_hosts, 
   name = '',
@@ -216,19 +218,22 @@ upset(
   width_ratio = 0.1,
   base_annotations = list(
     'Intersection size'=intersection_size(
-      text=list(size=3, angle=60, vjust=-0.1, hjust=-0.1), 
+      text=list(size=3, vjust=-0.1, hjust=0, angle=60), 
       text_aes = aes(
       label=paste0(signif(intersection_size/nrow(ak_skookag_boo) * 100, digits=2), '%')))), 
   themes = upset_modify_themes(
     list(
-      'Intersection_size'=theme(
-        panel.grid.major=element_blank(), 
-        panel.grid.minor=element_blank())
+        'Intersection size'=theme(
+          panel.grid.major=element_blank(), 
+          panel.grid.minor=element_blank(),
+          axis.line = element_line(colour="gray"))
       )
     )
   )
 
-
+'Intersection_size'=theme(
+        panel.grid.major=element_blank(), 
+        panel.grid.minor=element_blank())
 # another way to convert binary to boolean
 #ak_skookag_boo[ak_skookag_hosts] = ak_skookag_boo[ak_skookag_hosts] == 1 
 

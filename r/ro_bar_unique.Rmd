@@ -313,16 +313,6 @@ colnames(ro_soil_only_df)[2] <- "Count"
 ```
 
 
-## sums for bar labels
-
-```{r}
-
-ro_total_rbind_sums <- ro_total_rbind
-
-ro_total_rbind_sums <- ro_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(unique(ASV)), abund=sum(rel_abun))
-
-```
-
 
 
 ## rbind
@@ -338,6 +328,14 @@ ro_total_rbind <- do.call("rbind", list(ro_kolea_only_df,
                                         ro_soil_only_df))
 
 ro_total_rbind <- na.omit(ro_total_rbind)
+
+# sums for bar labels
+
+ro_total_rbind_sums <- ro_total_rbind
+
+ro_total_rbind_sums <- ro_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(unique(ASV)), abund=sum(rel_abun))
+
+
 
 ro_unique_bar <- ggplot(ro_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) +
   geom_bar(stat="identity", position="stack") +

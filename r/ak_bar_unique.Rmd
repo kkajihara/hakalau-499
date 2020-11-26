@@ -66,7 +66,7 @@ ak_kolea_only_df$family <- ak_tax_table_df$Family[match(ak_kolea_only_df$ASV, ak
 ak_kolea_only_df$Sample <- rep("Kolea root", nrow(ak_kolea_only_df))
 
 # make new column with ASV total filling all cells
-ak_kolea_only_df$Total <- rep(sum(ak_kolea_only_df$Count), nrow(ak_kolea_only_df))
+ak_kolea_only_df$Total <- rep(sum(ak_kolea_only_df$`Kolea root`), nrow(ak_kolea_only_df))
 
 # change host colname for future rbind
 colnames(ak_kolea_only_df)[2] <- "Count"
@@ -110,7 +110,7 @@ ak_grass_only_df$family <- ak_tax_table_df$Family[match(ak_grass_only_df$ASV, ak
 ak_grass_only_df$Sample <- rep("Grass root", nrow(ak_grass_only_df))
 
 # make new column with ASV total filling all cells
-ak_grass_only_df$Total <- rep(sum(ak_grass_only_df$Count), nrow(ak_grass_only_df))
+ak_grass_only_df$Total <- rep(sum(ak_grass_only_df$`Grass root`), nrow(ak_grass_only_df))
 
 # change host colname for future rbind
 colnames(ak_grass_only_df)[2] <- "Count"
@@ -153,7 +153,7 @@ ak_koa_only_df$family <- ak_tax_table_df$Family[match(ak_koa_only_df$ASV, ak_tax
 ak_koa_only_df$Sample <- rep("Koa root", nrow(ak_koa_only_df))
 
 # make new column with ASV total filling all cells
-ak_koa_only_df$Total <- rep(sum(ak_koa_only_df$Count), nrow(ak_koa_only_df))
+ak_koa_only_df$Total <- rep(sum(ak_koa_only_df$`Koa root`), nrow(ak_koa_only_df))
 
 # change host colname for future rbind
 colnames(ak_koa_only_df)[2] <- "Count"
@@ -197,7 +197,7 @@ ak_akala_only_df$family <- ak_tax_table_df$Family[match(ak_akala_only_df$ASV, ak
 ak_akala_only_df$Sample <- rep("Akala root", nrow(ak_akala_only_df))
 
 # make new column with ASV total filling all cells
-ak_akala_only_df$Total <- rep(sum(ak_akala_only_df$Count), nrow(ak_akala_only_df))
+ak_akala_only_df$Total <- rep(sum(ak_akala_only_df$`Akala root`), nrow(ak_akala_only_df))
 
 # change host colname for future rbind
 colnames(ak_akala_only_df)[2] <- "Count"
@@ -240,7 +240,7 @@ ak_ohia_only_df$family <- ak_tax_table_df$Family[match(ak_ohia_only_df$ASV, ak_t
 ak_ohia_only_df$Sample <- rep("Ohia root", nrow(ak_ohia_only_df))
 
 # make new column with ASV total filling all cells
-ak_ohia_only_df$Total <- rep(sum(ak_ohia_only_df$Count), nrow(ak_ohia_only_df))
+ak_ohia_only_df$Total <- rep(sum(ak_ohia_only_df$`Ohia root`), nrow(ak_ohia_only_df))
 
 # change host colname for future rbind
 colnames(ak_ohia_only_df)[2] <- "Count"
@@ -283,7 +283,7 @@ ak_olapa_only_df$family <- ak_tax_table_df$Family[match(ak_olapa_only_df$ASV, ak
 ak_olapa_only_df$Sample <- rep("Olapa root", nrow(ak_olapa_only_df))
 
 # make new column with ASV total filling all cells
-ak_olapa_only_df$Total <- rep(sum(ak_olapa_only_df$Count), nrow(ak_olapa_only_df))
+ak_olapa_only_df$Total <- rep(sum(ak_olapa_only_df$`Olapa root`), nrow(ak_olapa_only_df))
 
 # change host colname for future rbind
 colnames(ak_olapa_only_df)[2] <- "Count"
@@ -326,7 +326,7 @@ ak_soil_only_df$family <- ak_tax_table_df$Family[match(ak_soil_only_df$ASV, ak_t
 ak_soil_only_df$Sample <- rep("Soil", nrow(ak_soil_only_df))
 
 # make new column with ASV total filling all cells
-ak_soil_only_df$Total <- rep(sum(ak_soil_only_df$Count), nrow(ak_soil_only_df))
+ak_soil_only_df$Total <- rep(sum(ak_soil_only_df$`Soil`), nrow(ak_soil_only_df))
 
 # change host colname for future rbind
 colnames(ak_soil_only_df)[2] <- "Count"
@@ -400,6 +400,13 @@ ak_total_rbind <- do.call("rbind", list(ak_kolea_only_df,
                                         ak_soil_only_df))
 ak_total_rbind <- na.omit(ak_total_rbind)
 
+
+ak_total_rbind_sums <- ak_total_rbind
+
+# detach plyr if using. summarise() in plyr does something different
+ak_total_rbind_sums <- ak_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(ASV), abund=sum(rel_abun))
+
+
 ak_unique_bar <- ggplot(ak_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) +
   geom_bar(stat="identity", position="stack") +
   theme(axis.text.x = element_text(angle=90, size=14, colour="black", vjust=0.5, hjust=1, face="bold"), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_blank(),
@@ -408,22 +415,13 @@ ak_unique_bar <- ggplot(ak_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) 
         legend.title = element_text(size=16, face="bold"),
         legend.text = element_text(size=12, face="bold", colour="black"),
         axis.text.y = element_text(colour="black", size=12, face="bold")) +
-  ylim(0,10) +
+  ylim(0,8) +
   theme(plot.margin = unit(c(1,1,1,1), "cm")) +
   labs(x = "", y = "Relative Abundance (%)", fill="Family") +
   scale_fill_brewer(palette = "Spectral") +
   geom_text(data=ak_total_rbind_sums, aes(x=Sample, y=abund, label=count), inherit.aes = F, vjust=-1)
   
-  temp <- data.frame(x=c("Akala root", 
-                         "Grass root", 
-                         "Koa root",
-                         "Kolea root",
-                         "Ohia root",
-                         "Olapa root",
-                         "Soil"),
-                     y=c(1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1),
-                     z=unique(ak_total_rbind$Total))
-  
+
   scale_fill_manual(values = c("Acaulosporaceae" = "#000080",
                                "Ambisporaceae" = "#402fdf",
                                "Archaeosporaceae" = "#804fff",
