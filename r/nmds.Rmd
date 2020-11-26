@@ -194,7 +194,7 @@ nmds_plot_abun <- nmds_plot_rbind[,4:ncol(nmds_plot_rbind)]
 
 nmds_plot_abun <- as.matrix(nmds_plot_abun)
 
-set.seed(321)
+set.seed(123)
 nmds_byplot <- metaMDS(nmds_plot_abun, distance = "bray")
 
 
