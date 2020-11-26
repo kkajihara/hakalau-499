@@ -42,6 +42,7 @@ ro_grass <- prune_taxa(taxa_sums(ro_grass) > 0, ro_grass)
 
 ```{r}
 
+# see ak_split.Rmd for function
 ro_soil_mat <- make_matrix(ro_soil)
 ro_koa_mat <- make_matrix(ro_koa)
 ro_kolea_mat <- make_matrix(ro_kolea)
@@ -133,6 +134,8 @@ ro_skookag_mat[is.na(ro_skookag_mat)] <- 0
 
 
 
+## Make presence absence matrix
+
 ```{r}
 
 ro_skookag_mat_pa <- ro_skookag_mat
@@ -143,44 +146,19 @@ ro_skookag_mat_pa[ro_skookag_mat_pa > 0] <- 1
 ```
 
 
-```{r}
-
-ak_mat <- ak_skookap_mat
-
-ro_mat <- ro_skookap_mat
-
-```
-
-
 
 ```{r}
 
-ro_skookap_euler <- euler(ro_skookap_mat)
-ro_skookap_euler_plot <- plot(ro_skookap_euler, fills=TRUE, quantities=TRUE)
-ro_skookap_euler_plot
-
-```
-
-
-
-```{r}
-ro_skookag_mat_pa <- ro_skookag_mat
-
-# Changes NAs to 0
-ro_skookag_mat_pa[is.na(ro_skookag_mat_pa)] <- 0
-
-# Makes presence absence (turns any value > 0 into 1)
-ro_skookag_mat_pa[ro_skookag_mat_pa > 0] <- 1
-
-
+# old upset code (using UpSetR)
 upset(ro_skookag_mat_pa, nsets=7, nintersects = NA, sets.x.label = "Total ASVs")
 
-
 ```
+
 
 ## Upset with Percentages
 
 ```{r}
+library(ComplexUpset)
 
 # make a copy of presence absence matrix
 ro_skookag_boo <- ro_skookag_mat_pa
@@ -220,8 +198,6 @@ upset(
 ```
 
 
-
-
 ## RO Nestedness
 
 ```{r}
@@ -236,14 +212,7 @@ sort(colSums(ro_skookag_mat_nest))
 ro_skookag_mat_nest <- t(ro_skookag_mat_nest)
 
 
-ro_sample_order <- c("Soil",
-                     "Kolea root",
-                     "Grass root",
-                     "Koa root",
-                    "Akala root",
-                    "Ohia root",
-                    "Olapa root")
-
+# ordered by visually assessing nestedness, not by size
 alt_ro_sample_order <- c("Soil",
                      "Koa root",
                      "Akala root",
@@ -277,8 +246,6 @@ ro_nest <- heatmap(ro_nest_mat, Colv=NA, Rowv=NA, labCol=NA, margins = c(5,5))
 
 
 ```
-
-
 
 
 
