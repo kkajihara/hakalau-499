@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# NMDS by Host/Soil
+
 ## AK 
 
 ```{r}
@@ -65,7 +67,7 @@ data_scores$Habitat <- nmds_mat$habitat
 
 
 nmds_plot <- ggplot(data_scores, aes(x = NMDS1, y = NMDS2)) + 
-    geom_point(size = 4, aes( shape = Habitat, colour = Sample))+ 
+    geom_point(data = data_scores, size = 4, aes(shape = Habitat, colour = Sample))+ 
     theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
     axis.text.x = element_text(colour = "black", face = "bold", size = 12), 
     legend.text = element_text(size = 12, face ="bold", colour ="black"), 
@@ -74,15 +76,150 @@ nmds_plot <- ggplot(data_scores, aes(x = NMDS1, y = NMDS2)) +
     legend.title = element_text(size = 14, colour = "black", face = "bold"), 
     panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
     legend.key=element_blank()) + 
+    annotate("text", label="stress=0.230", x=0.8, y=-0.7, colour="black") +
     labs(x = "NMDS1", colour = "Sample", y = "NMDS2", shape = "Habitat")  + 
-    scale_fill_brewer(palette = "Spectral")
+    scale_color_brewer(palette = "Set2")
 
 
 ```
 
 
+# NMDS by Plot
+
+## Data prep
+
+```{r}
+
+# Soil
+
+soil_nmds_mat <- as.data.frame(otu_table(merged_soil_plot))
+
+soil_nmds_mat <- rownames_to_column(soil_nmds_mat, 'Plot')
+
+habitat_string <- stri_sub(soil_nmds_mat[[1]], 1, 2)
+
+soil_nmds_mat <- soil_nmds_mat %>% mutate(soil_nmds_mat, Habitat = habitat_string, .after = 1) %>%
+  add_column(Sample = rep("Soil", nrow(soil_nmds_mat)), .after = 2)
+           
+
+# Koa 
+
+koa_nmds_mat <- as.data.frame(otu_table(rarefied_koa))
+
+koa_nmds_mat <- rownames_to_column(koa_nmds_mat, 'Plot')
+
+koa_nmds_mat <- koa_nmds_mat %>% mutate(koa_nmds_mat, Habitat = habitat_string, .after = 1) %>%
+  add_column(Sample = rep("Koa root", nrow(koa_nmds_mat)), .after = 2)
 
 
+# Ohia 
+
+ohia_nmds_mat <- as.data.frame(otu_table(rarefied_ohia))
+
+ohia_nmds_mat <- rownames_to_column(ohia_nmds_mat, 'Plot')
+
+ohia_nmds_mat <- ohia_nmds_mat %>% mutate(ohia_nmds_mat, Habitat = habitat_string, .after = 1) %>%
+  add_column(Sample = rep("Ohia root", nrow(ohia_nmds_mat)), .after = 2)
+
+
+# Olapa 
+
+olapa_nmds_mat <- as.data.frame(otu_table(rarefied_olapa))
+
+olapa_nmds_mat <- rownames_to_column(olapa_nmds_mat, 'Plot')
+
+olapa_nmds_mat <- olapa_nmds_mat %>% mutate(olapa_nmds_mat, Habitat = habitat_string, .after = 1) %>%
+  add_column(Sample = rep("Olapa root", nrow(olapa_nmds_mat)), .after = 2)
+
+
+# Kolea
+
+kolea_nmds_mat <- as.data.frame(otu_table(rarefied_kolea))
+
+kolea_nmds_mat <- rownames_to_column(kolea_nmds_mat, 'Plot')
+
+kolea_habitat_string <- stri_sub(kolea_nmds_mat[[1]], 1, 2)
+
+kolea_nmds_mat <- kolea_nmds_mat %>% mutate(kolea_nmds_mat, Habitat = kolea_habitat_string, .after = 1) %>%
+  add_column(Sample = rep("Kolea root", nrow(kolea_nmds_mat)), .after = 2)
+
+
+# Akala 
+
+akala_nmds_mat <- as.data.frame(otu_table(rarefied_akala))
+
+akala_nmds_mat <- rownames_to_column(akala_nmds_mat, 'Plot')
+
+akala_nmds_mat <- akala_nmds_mat %>% mutate(akala_nmds_mat, Habitat = habitat_string, .after = 1) %>%
+  add_column(Sample = rep("Akala root", nrow(akala_nmds_mat)), .after = 2)
+
+
+# Grass 
+
+grass_nmds_mat <- as.data.frame(otu_table(rarefied_grass))
+
+grass_nmds_mat <- rownames_to_column(grass_nmds_mat, 'Plot')
+
+grass_nmds_mat <- grass_nmds_mat %>% mutate(grass_nmds_mat, Habitat = habitat_string, .after = 1) %>%
+  add_column(Sample = rep("Grass root", nrow(grass_nmds_mat)), .after = 2)
+
+
+```
+
+
+## Rbind
+
+```{r}
+
+nmds_plot_rbind <- do.call("rbind.fill", list(soil_nmds_mat,
+                                              koa_nmds_mat,
+                                              ohia_nmds_mat,
+                                              olapa_nmds_mat,
+                                              kolea_nmds_mat,
+                                              akala_nmds_mat,
+                                              grass_nmds_mat))
+
+
+nmds_plot_rbind[is.na(nmds_plot_rbind)] <- 0
+
+
+```
+
+
+## NMDS Plot plot
+
+```{r}
+
+nmds_plot_abun <- nmds_plot_rbind[,4:ncol(nmds_plot_rbind)]
+
+nmds_plot_abun <- as.matrix(nmds_plot_abun)
+
+set.seed(321)
+nmds_byplot <- metaMDS(nmds_plot_abun, distance = "bray")
+
+
+plot_data_scores <- as.data.frame(scores(nmds_byplot))
+
+plot_data_scores$Sample <- nmds_plot_rbind$Sample
+
+plot_data_scores$Habitat <- nmds_plot_rbind$Habitat
+
+
+nmds_plot_plot <- ggplot(plot_data_scores, aes(x = NMDS1, y = NMDS2)) + 
+    geom_point(data = plot_data_scores, size = 4, aes(shape = Habitat, colour = Sample))+ 
+    theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
+    axis.text.x = element_text(colour = "black", face = "bold", size = 12), 
+    legend.text = element_text(size = 12, face ="bold", colour ="black"), 
+    legend.position = "right", axis.title.y = element_text(face = "bold", size = 14), 
+    axis.title.x = element_text(face = "bold", size = 14, colour = "black"), 
+    legend.title = element_text(size = 14, colour = "black", face = "bold"), 
+    panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+    legend.key=element_blank()) +
+    annotate("text", label="stress=0.230", x=0.65, y=-0.85, colour="black") +
+    labs(x = "NMDS1", colour = "Sample", y = "NMDS2", shape = "Habitat")  + 
+    scale_color_brewer(palette = "Set2")
+
+```
 
 
 
