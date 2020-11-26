@@ -14,7 +14,7 @@ library(tibble)
 ```
 
 
-## Add NewSampleType Column
+## Add NewSampleType Column to sample_data
 
 ```{r}
 
@@ -40,28 +40,6 @@ sd_df <- sd_df %>%
 sample_data(unrarefied_physeq)$NewSampleType <- sample_data(sd_df)$NewSampleType
 
 ```
-
-
-
-## Short method attempt that's not working
-
-```{r}
-
-# Failed function
-subset_and_prune <- function(physeq, sample_type) {
-#Subset samples by provided sample type (Soil, Koa root, etc.)
-  subset_physeq <- subset_samples(physeq, NewSampleType==as.character(sample_type))
-  # Remove empty taxa
-  subset_physeq <- prune_taxa(taxa_sums(subset_physeq) > 0, subset_physeq)
-  return(subset_physeq)
-}
-
-#subset_func_test <- subset_and_prune(unrarefied_physeq,"Soil")
-
-
-```
-
-# Long method
 
 ## Subset samples
 
@@ -106,20 +84,6 @@ akala_physeq <- prune_taxa(taxa_sums(akala_root_samples) > 0, akala_root_samples
 pilo_physeq <- prune_taxa(taxa_sums(pilo_root_samples) > 0, pilo_root_samples)
 
 grass_physeq <- prune_taxa(taxa_sums(grass_root_samples) > 0, grass_root_samples)
-
-
-# Function did not prune taxa
-prune_and_merge <- function(physeq, group) {
-  require(phyloseq)
-  pruned_physeq <- prune_taxa(taxa_sums(physeq) > 0, physeq)
-  merged_physeq <- merge_samples(physeq, group)
-  return(merged_physeq)
-}
-
-#merged_soil_physeq <- prune_and_merge(soil_samples, "Plot")
-
-
-
 
 
 ```
@@ -209,7 +173,6 @@ min(c(koa_rowsums, ohia_rowsums, olapa_rowsums, akala_rowsums, pilo_rowsums, tri
 
 
 
-
 ## Rarefy!
 
 ```{r}
@@ -229,23 +192,6 @@ rarefied_pilo <- rarefy_even_depth(merged_pilo_plot, sample.size=min(sample_sums
 rarefied_grass <- rarefy_even_depth(merged_grass_plot, sample.size=min(sample_sums(merged_grass_plot)), rngseed=7)
 
 ```
-
-
-
-
-
-```{r}
-
-# From previous koa ohia only analysis. 
-# Rarefy using the lowest root plot sum. Use rngseed to reproduce in the future.
-
-#rarefied_koa_root <- rarefy_even_depth(merged_koa_root_plot, sample.size=min(sample_sums(merged_ohia_root_plot)), rngseed=12)
-
-
-#rarefied_ohia_root <- rarefy_even_depth(merged_ohia_root_plot, sample.size=min(sample_sums(merged_ohia_root_plot)), rngseed=13)
-
-```
-
 
 
 
