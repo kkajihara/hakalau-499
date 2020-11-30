@@ -168,10 +168,17 @@ ak_skookag_mat_pa[ak_skookag_mat_pa > 0] <- 1
 library(ComplexUpset)
 
 # make a copy of presence absence matrix
-ak_skookag_boo <- ak_skookag_mat_pa
+ak_skookag_bin <- ak_skookag_mat_pa
+
+ak_skookag_bin <- rownames_to_column(ak_skookag_bin, "ASV")
+
+ak_skookag_bin$family <- ak_tax_table_df$Family[match(ak_skookag_bin$ASV, ak_tax_table_df$ASV)]
+
+ak_skookag_bin <- column_to_rownames(ak_skookag_bin, "ASV")
 
 # convert binary to boolean
-ak_skookag_boo <- apply(ak_skookag_boo, 2, function(x) as.logical(x))
+ak_skookag_boo <- apply(ak_skookag_bin[1:7], 2, function(x) as.logical(x))
+
 
 # convert matrix to data frame 
 ak_skookag_boo <- as.data.frame(ak_skookag_boo)
@@ -203,6 +210,17 @@ ak_upset <-
     )
   )
 
+
+
+annotations = list(
+    'Family'=list(
+      aes=aes(x=intersection, fill=family),
+      geom=list(
+        geom_bar(stat='count', position='fill'),
+        scale_y_continuous(labels=scales::percent_format())
+      )
+    )
+  )
 
 
 ```

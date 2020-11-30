@@ -89,6 +89,9 @@ nmds_plot <- ggplot(data_scores, aes(x = NMDS1, y = NMDS2)) +
 ## Data prep
 
 ```{r}
+library(stringi)
+library(tibble)
+library(dplyr)
 
 # Soil
 
@@ -190,23 +193,23 @@ nmds_plot_rbind[is.na(nmds_plot_rbind)] <- 0
 
 ```{r}
 
-nmds_plot_abun <- nmds_plot_rbind[,4:ncol(nmds_plot_rbind)]
+nmds_byplot_abun <- nmds_plot_rbind[,4:ncol(nmds_plot_rbind)]
 
-nmds_plot_abun <- as.matrix(nmds_plot_abun)
+nmds_byplot_abun <- as.matrix(nmds_byplot_abun)
 
 set.seed(123)
-nmds_byplot <- metaMDS(nmds_plot_abun, distance = "bray")
+nmds_byplot <- metaMDS(nmds_byplot_abun, distance = "bray")
 
 
-plot_data_scores <- as.data.frame(scores(nmds_byplot))
+byplot_data_scores <- as.data.frame(scores(nmds_byplot))
 
-plot_data_scores$Sample <- nmds_plot_rbind$Sample
+byplot_data_scores$Sample <- nmds_plot_rbind$Sample
 
-plot_data_scores$Habitat <- nmds_plot_rbind$Habitat
+byplot_data_scores$Habitat <- nmds_plot_rbind$Habitat
 
 
-nmds_plot_plot <- ggplot(plot_data_scores, aes(x = NMDS1, y = NMDS2)) + 
-    geom_point(data = plot_data_scores, size = 4, aes(shape = Habitat, colour = Sample))+ 
+nmds_byplot_plot <- ggplot(byplot_data_scores, aes(x = NMDS1, y = NMDS2)) + 
+    geom_point(data = byplot_data_scores, size = 4, aes(shape = Habitat, colour = Sample))+ 
     theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
     axis.text.x = element_text(colour = "black", face = "bold", size = 12), 
     legend.text = element_text(size = 12, face ="bold", colour ="black"), 

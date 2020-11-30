@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## AK unique ASVs
 
 ```{r}
+library(reshape2)
 
 # make new copy of melted unique ak df
 ak_unique_table_df <- ak_total_rbind
