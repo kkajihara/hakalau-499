@@ -13,10 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+# make a copy of the merged OTU table. Before transposing, hosts/soil are columns and ASVs are rows. 
 ak_nmds_mat <- t(ak_skookag_mat)
 
+# convert to data frame
 ak_nmds_mat <- as.data.frame(ak_nmds_mat)
 
+# change host names and soil from row name to column so ggplot can recognize later
+# add a column with the habitat name for later use in ggplot
 ak_nmds_mat <- ak_nmds_mat %>% rownames_to_column('Sample') %>%
   add_column(habitat = rep("AK", nrow(ak_nmds_mat)), .after = 1)
 
@@ -27,21 +31,31 @@ ak_nmds_mat <- ak_nmds_mat %>% rownames_to_column('Sample') %>%
 
 ```{r}
 
+# make a copy of the merged OTU table. Before transposing, hosts/soil are columns and ASVs are rows. 
 ro_nmds_mat <- t(ro_skookag_mat)
 
+# convert to data frame
 ro_nmds_mat <- as.data.frame(ro_nmds_mat)
 
+# change host names and soil from row name to column so ggplot can recognize later
+# add a column with the habitat name for later use in ggplot
 ro_nmds_mat <- ro_nmds_mat %>% rownames_to_column('Sample') %>%
   add_column(habitat = rep("RO", nrow(ro_nmds_mat)), .after = 1)
 
 ```
 
+
+
 ## rbind
 
 ```{r}
+# DETACH after if using dplyr later
+library(plyr)
 
+# merge the two habitat tables, adding NAs where ASVs are not present in a given host/soil
 nmds_mat <- rbind.fill(ak_nmds_mat, ro_nmds_mat)
 
+# convert NAs to 0s
 nmds_mat[is.na(nmds_mat)] <- 0
 
 ```
@@ -50,22 +64,29 @@ nmds_mat[is.na(nmds_mat)] <- 0
 ## nmds
 
 ```{r}
+library(vegan)
 
+# take only the ASV columns (not the sample or habitat columns)
 nmds_abun <- nmds_mat[,3:ncol(nmds_mat)]
 
+# convert to matrix
 nmds_abun <- as.matrix(nmds_abun)
 
+
 set.seed(123)
+# make NMDS
 nmds <- metaMDS(nmds_abun, distance = "bray")
 
-
+# extract NMDS scores into a data frame
 data_scores <- as.data.frame(scores(nmds))
 
+# add in sample column from original merged df
 data_scores$Sample <- nmds_mat$Sample
 
+# add in habitat column from original merged df
 data_scores$Habitat <- nmds_mat$habitat
 
-
+# create nmds plot. Get stress value from 'nmds'
 nmds_plot <- ggplot(data_scores, aes(x = NMDS1, y = NMDS2)) + 
     geom_point(data = data_scores, size = 4, aes(shape = Habitat, colour = Sample))+ 
     theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
@@ -84,6 +105,7 @@ nmds_plot <- ggplot(data_scores, aes(x = NMDS1, y = NMDS2)) +
 ```
 
 
+
 # NMDS by Plot
 
 ## Data prep
@@ -95,14 +117,22 @@ library(dplyr)
 
 # Soil
 
+# take the OTU table from the physeq object subsetted by sample, merged by plot
 soil_nmds_mat <- as.data.frame(otu_table(merged_soil_plot))
 
+# make plot names into a column
 soil_nmds_mat <- rownames_to_column(soil_nmds_mat, 'Plot')
 
+# extract first and second characters from the strings in column 1 ("AK" or "RO")
 habitat_string <- stri_sub(soil_nmds_mat[[1]], 1, 2)
 
+# make a column with the extracted habitat names and a column with the host/soil repeated
 soil_nmds_mat <- soil_nmds_mat %>% mutate(soil_nmds_mat, Habitat = habitat_string, .after = 1) %>%
   add_column(Sample = rep("Soil", nrow(soil_nmds_mat)), .after = 2)
+
+
+## Repeat above steps for all hosts using rarefied root physeq objects to start!
+## the same habitat_string (6 "AK" and 6 "RO") applies for all except Kolea which has 5 AK and 5 RO)
            
 
 # Koa 
@@ -170,10 +200,12 @@ grass_nmds_mat <- grass_nmds_mat %>% mutate(grass_nmds_mat, Habitat = habitat_st
 ```
 
 
+
 ## Rbind
 
 ```{r}
 
+# merge all host/soil tables by ASV row name, adding NAs where there are no matches
 nmds_plot_rbind <- do.call("rbind.fill", list(soil_nmds_mat,
                                               koa_nmds_mat,
                                               ohia_nmds_mat,
@@ -182,32 +214,39 @@ nmds_plot_rbind <- do.call("rbind.fill", list(soil_nmds_mat,
                                               akala_nmds_mat,
                                               grass_nmds_mat))
 
-
+# change NAs to 0s
 nmds_plot_rbind[is.na(nmds_plot_rbind)] <- 0
 
 
 ```
 
 
+
 ## NMDS Plot plot
 
 ```{r}
 
+# take only ASV count columns
 nmds_byplot_abun <- nmds_plot_rbind[,4:ncol(nmds_plot_rbind)]
 
+# convert to matrix
 nmds_byplot_abun <- as.matrix(nmds_byplot_abun)
 
 set.seed(123)
+# make NMDS
 nmds_byplot <- metaMDS(nmds_byplot_abun, distance = "bray")
 
-
+# extract NMDS scores
 byplot_data_scores <- as.data.frame(scores(nmds_byplot))
 
+# add sample column
 byplot_data_scores$Sample <- nmds_plot_rbind$Sample
 
+# add habitat column
 byplot_data_scores$Habitat <- nmds_plot_rbind$Habitat
 
 
+# create plot
 nmds_byplot_plot <- ggplot(byplot_data_scores, aes(x = NMDS1, y = NMDS2)) + 
     geom_point(data = byplot_data_scores, size = 4, aes(shape = Habitat, colour = Sample))+ 
     theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
@@ -223,6 +262,7 @@ nmds_byplot_plot <- ggplot(byplot_data_scores, aes(x = NMDS1, y = NMDS2)) +
     scale_color_brewer(palette = "Set2")
 
 ```
+
 
 
 
