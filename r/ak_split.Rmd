@@ -39,8 +39,6 @@ ak_akala <- prune_taxa(taxa_sums(ak_akala) > 0, ak_akala)
 ak_grass <- subset_samples(rarefied_grass, grepl("AK", sample_names(rarefied_grass)))
 ak_grass <- prune_taxa(taxa_sums(ak_grass) > 0, ak_grass)
 
-
-
 ```
 
 
@@ -54,8 +52,6 @@ make_matrix <- function(physeq) {
 
 ```
 
-
-
 ```{r}
 
 ak_soil_mat <- make_matrix(ak_soil)
@@ -66,7 +62,6 @@ ak_olapa_mat <- make_matrix(ak_olapa)
 ak_akala_mat <- make_matrix(ak_akala)
 #ak_pilo_mat <- make_matrix(ak_pilo)
 ak_grass_mat <- make_matrix(ak_grass)
-
 
 ```
 
@@ -89,7 +84,6 @@ colnames(ak_akala_mat) <- c("Akala root")
 #colnames(ak_pilo_mat) <- c("Pilo root")
 
 colnames(ak_grass_mat) <- c("Grass root")
-
 
 ```
 
@@ -157,7 +151,6 @@ ak_skookag_mat_pa <- ak_skookag_mat
 # Makes presence absence (turns any value > 0 into 1)
 ak_skookag_mat_pa[ak_skookag_mat_pa > 0] <- 1
 
-
 ```
 
 
@@ -167,7 +160,7 @@ ak_skookag_mat_pa[ak_skookag_mat_pa > 0] <- 1
 
 library(ComplexUpset)
 
-# make a copy of presence absence matrix
+# save for later
 ak_skookag_bin <- ak_skookag_mat_pa
 
 ak_skookag_bin <- rownames_to_column(ak_skookag_bin, "ASV")
@@ -211,7 +204,7 @@ ak_upset <-
     )
   )
 
-
+# includes all intersections
 ak_upset_full <- 
   upset(
   ak_skookag_boo, 
@@ -234,11 +227,24 @@ ak_upset_full <-
     )
   )
 
-
-
 ```
 
+## ComplexUpset with Family Annotation (not tested yet)
 
+```{r}
+
+library(ComplexUpset)
+
+# save for later
+ak_skookag_bin <- ak_skookag_mat_pa
+
+ak_skookag_bin <- rownames_to_column(ak_skookag_bin, "ASV")
+
+ak_skookag_bin$family <- ak_tax_table_df$Family[match(ak_skookag_bin$ASV, ak_tax_table_df$ASV)]
+
+ak_skookag_bin <- column_to_rownames(ak_skookag_bin, "ASV")
+
+```
 
 
 ## Nestedness Plot
@@ -285,8 +291,8 @@ alt_ak_nest_mat <- alt_ak_nest_mat[, ak_asv_order]
 
 alt_ak_nest <- heatmap(alt_ak_nest_mat, Colv=NA, Rowv=NA, labCol=NA, margins = c(5,5))
 
-
 ```
+
 
 
 

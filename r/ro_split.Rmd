@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## AK Restored
+## RO Remnant
 
 ```{r}
 
@@ -34,8 +34,6 @@ ro_akala <- prune_taxa(taxa_sums(ro_akala) > 0, ro_akala)
 
 ro_grass <- subset_samples(rarefied_grass, grepl("RO", sample_names(rarefied_grass)))
 ro_grass <- prune_taxa(taxa_sums(ro_grass) > 0, ro_grass)
-
-
 
 ```
 
@@ -122,13 +120,8 @@ rownames(ro_skookag_mat) <- ro_skookag_mat[,1]
 ro_skookag_mat[,1] <- NULL
 
 
-
-#ro_skookapg_mat$`Pilo root` <- NULL
-#ro_skookag_mat <- ro_skookapg_mat
-
 # Changes NAs to 0
 ro_skookag_mat[is.na(ro_skookag_mat)] <- 0
-
 
 ```
 
@@ -188,7 +181,7 @@ ro_upset <-
     )
   )
 
-
+# includes all intersections
 ro_upset_full <- 
   upset(
   ro_skookag_boo, 
@@ -210,7 +203,6 @@ ro_upset_full <-
       )
     )
   )
-
 
 ```
 
@@ -260,7 +252,6 @@ ro_asv_order <- ro_composite_score$OTU_ID
 ro_nest_mat <- ro_nest_mat[, ro_asv_order]
 
 ro_nest <- heatmap(ro_nest_mat, Colv=NA, Rowv=NA, labCol=NA, margins = c(5,5))
-
 
 ```
 
