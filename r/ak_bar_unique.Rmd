@@ -23,9 +23,6 @@ ak_tax_table_df <- ak_tax_table_df %>% rownames_to_column('ASV')
 # where family = Paraglomerales, change to Glomeromycotina
 ak_tax_table_df$Family <- gsub("Paraglomerales", "Glomeromycotina", ak_tax_table_df$Family)
 
-# remove entries where Family = Paraglomerales
-#ak_tax_table_df <- filter(ak_tax_table_df, !grepl('Paraglomerales', Family))
-
 
 ```
 
@@ -333,59 +330,6 @@ colnames(ak_soil_only_df)[2] <- "Count"
 
 ```
 
-## Bar counts
-
-```{r}
-
-ak_unique_kolea_df <- ak_unique_kolea_df %>% column_to_rownames('ASV')
-ak_kolea_col <- ak_unique_kolea_df %>% select(`Kolea root`)
-
-ak_unique_grass_df <- ak_unique_grass_df %>% column_to_rownames('ASV')
-ak_grass_col <- ak_unique_grass_df %>% select(`Grass root`)
-
-ak_unique_akala_df <- ak_unique_akala_df %>% column_to_rownames('ASV')
-ak_akala_col <- ak_unique_akala_df %>% select(`Akala root`)
-
-ak_unique_olapa_df <- ak_unique_olapa_df %>% column_to_rownames('ASV')
-ak_olapa_col <- ak_unique_olapa_df %>% select(`Olapa root`)
-
-ak_unique_ohia_df <- ak_unique_ohia_df %>% column_to_rownames('ASV')
-ak_ohia_col <- ak_unique_ohia_df %>% select(`Ohia root`)
-
-ak_unique_koa_df <- ak_unique_koa_df %>% column_to_rownames('ASV')
-ak_koa_col <- ak_unique_koa_df %>% select(`Koa root`)
-
-ak_unique_soil_df <- ak_unique_soil_df %>% column_to_rownames('ASV')
-ak_soil_col <- ak_unique_soil_df %>% select(`Soil`)
-
-
-#ak_unique_df_list <- c(ak_kolea_col, ak_grass_col, ak_akala_col, ak_olapa_col, ak_ohia_col, ak_koa_col, ak_soil_col)
-
-
-merge_prep <- function(df) {
-  rownames(df) <- df[,1]
-  df[,1] <- NULL
-  return(df)
-}
-
-
-
-
-
-# Changes NAs to 0
-ak_merged_unique_df[is.na(ak_merged_unique_df)] <- 0
-
-
-ak_total_rbind_sums <- ak_total_rbind
-
-ak_total_rbind_sums <- ak_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(unique(ASV)), abund=sum(rel_abun))
-
-ak_unique_sums <- ak_total_rbind_sums[[3]]
-
-
-```
-
-
 
 ## rbind
 
@@ -398,14 +342,27 @@ ak_total_rbind <- do.call("rbind", list(ak_kolea_only_df,
                                         ak_ohia_only_df,
                                         ak_olapa_only_df,
                                         ak_soil_only_df))
+
 ak_total_rbind <- na.omit(ak_total_rbind)
 
 
+## Getting ASV counts for bar labels
+
+# make a copy
 ak_total_rbind_sums <- ak_total_rbind
 
 # detach plyr if using. summarise() in plyr does something different
 ak_total_rbind_sums <- ak_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(ASV), abund=sum(rel_abun))
 
+
+```
+
+
+
+## Plot
+
+```{r}
+library(ggplot2)
 
 ak_unique_bar <- ggplot(ak_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) +
   geom_bar(stat="identity", position="stack") +
@@ -420,24 +377,8 @@ ak_unique_bar <- ggplot(ak_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) 
   labs(x = "", y = "Relative Abundance (%)", fill="Family") +
   scale_fill_brewer(palette = "Spectral") +
   geom_text(data=ak_total_rbind_sums, aes(x=Sample, y=abund, label=count), inherit.aes = F, vjust=-1)
-  
-
-  scale_fill_manual(values = c("Acaulosporaceae" = "#000080",
-                               "Ambisporaceae" = "#402fdf",
-                               "Archaeosporaceae" = "#804fff",
-                               "Claroideoglomeraceae" = "#bf80df",
-                               "Diversisporaceae" = "#eeb09f",
-                               "Geosiphonaceae" = "#ffda80",
-                               "Gigasporaceae" = "#eef59f",
-                               "Glomeraceae" = "#bfffdf",
-                               "Glomeromycotina" = "#40dadf",
-                               "Paraglomeraceae" = "#11b09f",
-                               "Paraglomerales" = "#008180"))
-
 
 ```
-
-
 
 
 

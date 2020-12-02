@@ -146,15 +146,6 @@ ro_skookag_mat_pa[ro_skookag_mat_pa > 0] <- 1
 ```
 
 
-
-```{r}
-
-# old upset code (using UpSetR)
-upset(ro_skookag_mat_pa, nsets=7, nintersects = NA, sets.x.label = "Total ASVs")
-
-```
-
-
 ## Upset with Percentages
 
 ```{r}
@@ -174,7 +165,31 @@ ro_skookag_hosts <- colnames(ro_skookag_boo)
 
 
 # generate upset plot with percentage labels
+# change min_size to only show intersections >1%
 ro_upset <- 
+  upset(
+  ro_skookag_boo, 
+  ro_skookag_hosts, 
+  name = '',
+  min_size=11,
+  width_ratio = 0.1,
+  base_annotations = list(
+    'Intersection size'=intersection_size(
+      text=list(size=3, angle=60, vjust=-0.1, hjust=0), 
+      text_aes = aes(
+      label=paste0(signif(intersection_size/nrow(ro_skookag_boo) * 100, digits=2), '%')))), 
+  themes = upset_modify_themes(
+    list(
+      'Intersection size'=theme(
+          panel.grid.major=element_blank(), 
+          panel.grid.minor=element_blank(),
+          axis.line = element_line(colour="gray"))
+      )
+    )
+  )
+
+
+ro_upset_full <- 
   upset(
   ro_skookag_boo, 
   ro_skookag_hosts, 

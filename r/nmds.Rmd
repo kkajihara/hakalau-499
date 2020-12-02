@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
-# make a copy of the merged OTU table. Before transposing, hosts/soil are columns and ASVs are rows. 
+# make a copy of the merged OTU table (from ak_split). Before transposing, hosts/soil are columns and ASVs are rows. 
 ak_nmds_mat <- t(ak_skookag_mat)
 
 # convert to data frame
@@ -202,7 +202,7 @@ grass_nmds_mat <- grass_nmds_mat %>% mutate(grass_nmds_mat, Habitat = habitat_st
 
 
 
-## Rbind
+## rbind
 
 ```{r}
 

@@ -23,9 +23,6 @@ ro_tax_table_df <- ro_tax_table_df %>% rownames_to_column('ASV')
 # where family = Paraglomerales, change to Glomeromycotina
 ro_tax_table_df$Family <- gsub("Paraglomerales", "Glomeromycotina", ro_tax_table_df$Family)
 
-# remove entries where Family = Paraglomerales
-#ro_tax_table_df <- filter(ro_tax_table_df, !grepl('Paraglomerales', Family))
-
 
 ```
 
@@ -329,13 +326,19 @@ ro_total_rbind <- do.call("rbind", list(ro_kolea_only_df,
 
 ro_total_rbind <- na.omit(ro_total_rbind)
 
-# sums for bar labels
+## Getting ASV counts for bar labels
 
+# make a copy
 ro_total_rbind_sums <- ro_total_rbind
 
+# detach plyr if using. summarise() in plyr does something different
 ro_total_rbind_sums <- ro_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(unique(ASV)), abund=sum(rel_abun))
 
 
+```
+## Plot
+
+```{r}
 
 ro_unique_bar <- ggplot(ro_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) +
   geom_bar(stat="identity", position="stack") +
@@ -350,20 +353,11 @@ ro_unique_bar <- ggplot(ro_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) 
   labs(x = "", y = "Relative Abundance (%)", fill="Family") +
   scale_fill_brewer(palette = "Spectral") +
   geom_text(data=ro_total_rbind_sums, aes(x=Sample, y=abund, label=count), inherit.aes = F, vjust=-1)
-  
-  
-  scale_fill_manual(values = c("Acaulosporaceae" = "#000080",
-                               "Ambisporaceae" = "#402fdf",
-                               "Archaeosporaceae" = "#804fff",
-                               "Claroideoglomeraceae" = "#bf80df",
-                               "Diversisporaceae" = "#eeb09f",
-                               "Geosiphonaceae" = "#ffda80",
-                               "Gigasporaceae" = "#eef59f",
-                               "Glomeraceae" = "#bfffdf",
-                               "Glomeromycotina" = "#40dadf",
-                               "Paraglomeraceae" = "#11b09f",
-                               "Paraglomerales" = "#008180"))
-
 
 ```
+
+
+
+
+
 

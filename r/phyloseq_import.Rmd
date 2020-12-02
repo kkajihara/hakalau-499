@@ -35,21 +35,20 @@ The data coming from Qiime2 has gone through quality control and had chimeras an
 
 ```{r}
 
-## This is more to access the qiime artifact data, doesn't actually have to do with the phyloseq object yet
+## This is more to access the qiime artifact data if desired, doesn't actually have to do with the phyloseq object yet
 
 # Read in feature table
-asvs <- read_qza("../data/full-set-tax/maarjam95-90-80 ncbi-80/merged-glom-only-final-no-negs.qza")
+asvs <- read_qza("../data/merged-glom-only-final-no-negs.qza")
 
 # Read in metadata
 metadata <- read.table(file="../data/haka-metadata.tsv", sep="\t", header=TRUE, stringsAsFactors = TRUE)
 
 # tree
-tree <- read_qza("../data/full-set-tax/maarjam95-90-80 ncbi-80/rooted-tree.qza")
+tree <- read_qza("...data/rooted-tree.qza")
 
 # Read in taxonomy
-taxonomy <- read_qza(file="../data/full-set-tax/maarjam95-90-80 ncbi-80/total-merged-classification.qza")
+taxonomy <- read_qza(file="../data/total-merged-classification.qza")
 
-list.files("../data/full-set-tax/")
 
 ```
 
@@ -59,7 +58,11 @@ list.files("../data/full-set-tax/")
 ```{r}
 
 # Create phyloseq object
-unrarefied_physeq <- qza_to_phyloseq(features="../data/full-set-tax/maarjam95-90-80 ncbi-80/merged-glom-only-final-no-negs.qza", tree="../data/full-set-tax/maarjam95-90-80 ncbi-80/rooted-tree.qza", taxonomy="../data/full-set-tax/maarjam95-90-80 ncbi-80/total-merged-classification.qza", metadata="../data/haka-metadata.tsv")
+unrarefied_physeq <- qza_to_phyloseq(
+  features="../data/merged-glom-only-final-no-negs.qza", 
+  tree="../data/rooted-tree.qza", 
+  taxonomy="../data/total-merged-classification.qza", 
+  metadata="../data/haka-metadata.tsv")
 
 
 unrarefied_physeq

@@ -259,6 +259,11 @@ ak_total_shared_rbind <- do.call("rbind", list(ak_kolea_shared_df,
                                         ak_soil_shared_df))
 
 
+```
+
+## Plot
+
+```{r}
 
 ak_shared_bar <- ggplot(ak_total_shared_rbind, aes(x=Sample, fill=family, y=rel_abun)) +
   geom_bar(stat="identity", position="stack") +
@@ -271,6 +276,7 @@ ak_shared_bar <- ggplot(ak_total_shared_rbind, aes(x=Sample, fill=family, y=rel_
   ylim(0,100) +
   theme(plot.margin = unit(c(1,1,1,1), "cm")) +
   labs(x = "", y = "Relative Abundance (%)", fill="Family") +
+  #match colors to unique plot
   scale_fill_manual(values = c("Acaulosporaceae" = "#9e0142",
                                "Ambisporaceae" = "#d53e4f",
                                "Archaeosporaceae" = "#f46d43",
@@ -281,7 +287,6 @@ ak_shared_bar <- ggplot(ak_total_shared_rbind, aes(x=Sample, fill=family, y=rel_
                                "Paraglomeraceae" = "#5e4fa2"))
 
 ```
-
 
 
 

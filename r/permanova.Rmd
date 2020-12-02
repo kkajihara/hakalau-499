@@ -26,7 +26,6 @@ adon_host <- adonis(nmds_abun ~ data_scores$Sample, permutations = 9999, method 
 adon_hab_and_host <- adonis(nmds_abun ~ data_scores$Habitat + data_scores$Sample, permutations = 9999, method = "bray")
 
 
-
 ```
 
 
