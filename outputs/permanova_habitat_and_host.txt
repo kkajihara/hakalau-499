@@ -1,0 +1,16 @@
+
+Call:
+adonis(formula = nmds_abun ~ data_scores$Habitat + data_scores$Sample,      permutations = 9999, method = "bray") 
+
+Permutation: free
+Number of permutations: 9999
+
+Terms added sequentially (first to last)
+
+                    Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
+data_scores$Habitat  1   0.68540 0.68540  8.6865 0.25216 0.0001 ***
+data_scores$Sample   6   1.55929 0.25988  3.2937 0.57367 0.0083 ** 
+Residuals            6   0.47342 0.07890         0.17417           
+Total               13   2.71811                 1.00000           
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

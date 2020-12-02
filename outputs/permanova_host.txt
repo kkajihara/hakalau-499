@@ -1,0 +1,13 @@
+
+Call:
+adonis(formula = nmds_abun ~ data_scores$Sample, permutations = 9999,      method = "bray") 
+
+Permutation: free
+Number of permutations: 9999
+
+Terms added sequentially (first to last)
+
+                   Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
+data_scores$Sample  6    1.5593 0.25988  1.5698 0.57367  0.116
+Residuals           7    1.1588 0.16554         0.42633       
+Total              13    2.7181                 1.00000       
