@@ -7,6 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+To break down the family membership of ASVs by host and habitat.
 
 # Unique
 
@@ -18,12 +19,14 @@ library(reshape2)
 # make new copy of melted unique ak df
 ak_unique_table_df <- ak_total_rbind
 
-# group by Sample (species) and family
-# use dcast to "unmelt" df and have families as row names and Samples as col names with counts as the cell values
+# group by Sample (host/soil) and family
 ak_unique_table_df <- ak_unique_table_df %>% group_by(Sample, family) %>%
-  summarise(count=round((length(unique(ASV))/nrow(ak_skookag_mat) * 100), digits=2)) %>%
+  # calculate % of unique ASVs per host/soil belonging to a certain family
+  summarise(count=round((length(ASV)/nrow(ak_skookag_mat) * 100), digits=2)) %>%
+  # use dcast to "unmelt" df and have families as row names and Samples as col names with counts as the cell values
   dcast(family ~ Sample) %>%
   column_to_rownames('family') %>%
+  # rename columns
   rename_all(function(x) paste("AK", x, sep=" "))
 
 # Changes NAs to 0
@@ -40,12 +43,14 @@ ak_unique_table_df[is.na(ak_unique_table_df)] <- 0
 # make new copy of melted unique ak df
 ro_unique_table_df <- ro_total_rbind
 
-# group by Sample (species) and family
-# use dcast to "unmelt" df and have families as row names and Samples as col names with counts as the cell values
+# group by Sample (host/soil) and family
 ro_unique_table_df <- ro_unique_table_df %>% group_by(Sample, family) %>%
-  summarise(count=round((length(unique(ASV))/nrow(ro_skookag_mat) * 100), digits=2)) %>%
+  # calculate % of unique ASVs per host/soil belonging to a certain family
+  summarise(count=round(length(ASV)/nrow(ro_skookag_mat) * 100), digits=2) %>%
+  # use dcast to "unmelt" df and have families as row names and Samples as col names with counts as the cell values
   dcast(family ~ Sample) %>%
   column_to_rownames('family') %>%
+  # rename columns
   rename_all(function(x) paste("RO", x, sep=" "))
 
 # Changes NAs to 0
@@ -83,8 +88,10 @@ ak_shared_table_df <- ak_total_shared_rbind
 # group by family and summarise to show number of unique ASVs per family
 # every sample has the same number of shared ASVs
 ak_shared_table_df <- ak_shared_table_df %>% group_by(family) %>%
+  # calculates the % of shared ASVs belonging to a certain family
   summarise(count=round((length(unique(ASV))/nrow(ak_skookag_mat) * 100), digits=2)) %>%
   column_to_rownames('family') %>%
+  # rename column
   rename_all(function(x) paste("AK"))
 
 
@@ -101,8 +108,10 @@ ro_shared_table_df <- ro_total_shared_rbind
 # group by family and summarise to show number of unique ASVs per family
 # every sample has the same number of shared ASVs
 ro_shared_table_df <- ro_shared_table_df %>% group_by(family) %>%
+  # calculates the % of shared ASVs belonging to a certain family
   summarise(count=round((length(unique(ASV))/nrow(ro_skookag_mat) * 100), digits=2)) %>%
   column_to_rownames('family') %>%
+  # rename column
   rename_all(function(x) paste("RO"))
 
 ```
