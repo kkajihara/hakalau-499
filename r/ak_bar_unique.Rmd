@@ -11,6 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+library(tibble)
+library(dplyr)
+
 # new name so I don't mess up the old one
 ak_bar_df <- ak_skookag_mat
 
@@ -342,8 +345,6 @@ ak_total_rbind <- do.call("rbind", list(ak_kolea_only_df,
                                         ak_ohia_only_df,
                                         ak_olapa_only_df,
                                         ak_soil_only_df))
-
-ak_total_rbind <- na.omit(ak_total_rbind)
 
 
 ## Getting ASV counts for bar labels

@@ -11,6 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+library(tibble)
+library(dplyr)
+
 # new name so I don't mess up the old one
 ro_bar_df <- ro_skookag_mat
 
@@ -324,21 +327,20 @@ ro_total_rbind <- do.call("rbind", list(ro_kolea_only_df,
                                         ro_olapa_only_df,
                                         ro_soil_only_df))
 
-ro_total_rbind <- na.omit(ro_total_rbind)
-
 ## Getting ASV counts for bar labels
 
 # make a copy
 ro_total_rbind_sums <- ro_total_rbind
 
 # detach plyr if using. summarise() in plyr does something different
-ro_total_rbind_sums <- ro_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(unique(ASV)), abund=sum(rel_abun))
+ro_total_rbind_sums <- ro_total_rbind_sums %>% group_by(Sample) %>% summarise(count=length(ASV), abund=sum(rel_abun))
 
 
 ```
 ## Plot
 
 ```{r}
+library(ggplot2)
 
 ro_unique_bar <- ggplot(ro_total_rbind, aes(x=Sample, fill=family, y=rel_abun)) +
   geom_bar(stat="identity", position="stack") +
