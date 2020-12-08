@@ -165,10 +165,10 @@ ro_upset <-
   ro_skookag_hosts, 
   name = '',
   min_size=11,
-  width_ratio = 0.1,
+  width_ratio = 0.2,
   base_annotations = list(
     'Intersection size'=intersection_size(
-      text=list(size=3, angle=60, vjust=-0.1, hjust=0), 
+      text=list(size=3, vjust=-0.5), 
       text_aes = aes(
       label=paste0(signif(intersection_size/nrow(ro_skookag_boo) * 100, digits=2), '%')))), 
   themes = upset_modify_themes(
