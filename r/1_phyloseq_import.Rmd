@@ -57,7 +57,6 @@ taxonomy <- read_qza(file="../data/total-merged-classification.qza")
 
 ```{r}
 
-# Create phyloseq object
 unrarefied_physeq <- qza_to_phyloseq(
   features="../data/merged-glom-only-final-no-negs.qza", 
   tree="../data/rooted-tree.qza", 
@@ -67,8 +66,6 @@ unrarefied_physeq <- qza_to_phyloseq(
 
 unrarefied_physeq
 
-saveRDS(unrarefied_physeq, "../intermediate_files/unrarefied_physeq.rds")
-
 ```
 
 
@@ -77,6 +74,8 @@ saveRDS(unrarefied_physeq, "../intermediate_files/unrarefied_physeq.rds")
 ```{r}
 # Change the taxa names to "ASV1, ASV2, etc." for working convenience
 taxa_names(unrarefied_physeq) <- paste0("ASV", seq(ntaxa(unrarefied_physeq)))
+
+saveRDS(unrarefied_physeq, "../intermediate_files/unrarefied_physeq.rds")
 
 ```
 

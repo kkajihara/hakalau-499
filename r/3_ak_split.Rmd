@@ -11,13 +11,21 @@ knitr::opts_chunk$set(echo = TRUE)
 Take rarefied root physeq objects + soil object.
 Use subset_samples to keep only AK or RO plots.
 
-## AK Restored
+## Things Needed
 
 ```{r}
+
 # read in host_names, rarefied_physeqs
 
 readRDS("../intermediate_files/host_names.rds")
 readRDS("../intermediate_files/rarefied_physeqs.rds")
+
+```
+
+
+## Isolate AK plots and remove empty taxa
+
+```{r}
 
 # rarefied_physeqs is a list with rarefied root physeqs and unrarefied soil physeq
 
@@ -31,6 +39,7 @@ for (a_host in host_names) {
 
 ```
 
+## Condense individual OTU tables into a single column (merge plots)
 
 ```{r}
 
@@ -51,7 +60,7 @@ for (a_host in host_names) {
 
 ```
 
-## Merging the host columns into one matrix
+## Merge the columns into one OTU table
 
 ```{r}
 

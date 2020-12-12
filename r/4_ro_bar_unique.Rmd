@@ -55,7 +55,8 @@ full_tax_table_df$Family <- gsub("Paraglomerales", "Glomeromycotina", full_tax_t
 
 ro_unique_asvs <- list()
 
-
+# makes a data frame per host including host specific ASVs + counts, relative abundance,
+# family, and host names
 for (a_host in host_names) {
   # subset host specific ASVs by host. Counts for all other hosts should be 0, 
   # so the rowsum == the host count

@@ -7,12 +7,20 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Things Needed
 
 ```{r}
+
 # read in host_names, rarefied_physeqs
 
 readRDS("../intermediate_files/host_names.rds")
 readRDS("../intermediate_files/rarefied_physeqs.rds")
+
+```
+
+## Isolate RO plots and remove empty taxa
+
+```{r}
 
 # rarefied_physeqs is a list with rarefied root physeqs and unrarefied soil physeq
 
@@ -26,6 +34,7 @@ for (a_host in host_names) {
 
 ```
 
+## Condense individual OTU tables into a single column (merge plots)
 
 ```{r}
 
@@ -45,7 +54,7 @@ for (a_host in host_names) {
 
 
 ```
-
+## Merge the columns into one OTU table
 
 ```{r}
 
