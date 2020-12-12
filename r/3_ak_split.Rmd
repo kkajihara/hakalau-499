@@ -1,0 +1,216 @@
+---
+title: "ak_split"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Take rarefied root physeq objects + soil object.
+Use subset_samples to keep only AK or RO plots.
+
+## AK Restored
+
+```{r}
+# read in host_names, rarefied_physeqs
+
+readRDS("../intermediate_files/host_names.rds")
+readRDS("../intermediate_files/rarefied_physeqs.rds")
+
+# rarefied_physeqs is a list with rarefied root physeqs and unrarefied soil physeq
+
+ak_physeqs <- list()
+
+for (a_host in host_names) {
+  ak <- subset_samples(rarefied_physeqs[[a_host]], 
+                 grepl("AK", sample_names(rarefied_physeqs[[a_host]])))
+  ak_physeqs[[a_host]] <- prune_taxa(taxa_sums(ak) > 0, ak)
+}
+
+```
+
+
+```{r}
+
+# function to make a single column matrix
+make_matrix <- function(physeq) {
+  single_col_matrix <- as(colSums(otu_table(physeq)), "matrix")
+  return(single_col_matrix)
+}
+
+
+ak_mats <- lapply(ak_physeqs, make_matrix)
+
+# name the columns by host
+for (a_host in host_names) {
+  colnames(ak_mats[[a_host]]) <- a_host
+}
+
+
+```
+
+## Merging the host columns into one matrix
+
+```{r}
+
+# Not a great solution! But it's the only one I could come up with
+# merge() only takes two inputs at a time and we had problems with Reduce()
+
+# merge the first two host columns by ASV names
+a <- merge(ak_mats$`Koa root`, ak_mats$`Olapa root`, by="row.names", all=TRUE)
+# ASVs become a row, change back to rownames
+rownames(a) <- a[,1]
+# remove the column where the ASVs just were so the next merge works
+a[,1] <- NULL
+
+# merge the remaining 5 columns to the 2-column matrix
+for (i in 3:7) {
+  a <- merge(a, ak_mats[[i]], by="row.names", all=T)
+  rownames(a) <- a[,1]
+  a[,1] <- NULL
+}
+
+# somewhere in there it became a data frame, so turn back into matrix and rename
+ak_full_mat <- as(a, "matrix")
+
+# Change NAs to 0
+ak_full_mat[is.na(ak_full_mat)] <- 0
+
+# save for later
+saveRDS(ak_full_mat, "../intermediate_files/ak_full_mat.rds")
+write.csv(ak_full_mat, "../intermediate_files/ak_full_mat.csv")
+
+```
+
+
+## Make presence absence matrix
+
+```{r}
+
+# make copy of abundance matrix for presence absence
+ak_full_mat_pa <- ak_full_mat
+
+# Makes presence absence (turns any value > 0 into 1)
+ak_full_mat_pa[ak_full_mat_pa > 0] <- 1
+
+# save for later
+saveRDS(ak_full_mat_pa, "../intermediate_files/ak_full_mat_pa.rds")
+write.csv(ak_full_mat_pa, "../intermediate_files/ak_full_mat_pa.csv")
+
+```
+
+
+## Upset Plot
+
+```{r}
+
+library(ComplexUpset)
+library(ggplot2)
+
+# upset wants a data frame
+ak_full_df_upset <- as.data.frame(ro_full_mat_pa)
+
+
+# Generate upset plot with percentage labels
+# change min_size to only show intersections >1%
+ak_upset <- 
+  upset(
+  ak_full_df_upset, 
+  host_names, 
+  name = '',
+  min_size=10,
+  width_ratio = 0.2,
+  base_annotations = list(
+    'Intersection size'=intersection_size(
+      text=list(size=3, vjust=-0.5), 
+      text_aes = aes(
+      label=paste0(signif(intersection_size/nrow(ak_full_mat_pa) * 100, digits=2), '%')))), 
+  themes = upset_modify_themes(
+    list(
+        'Intersection size'=theme(
+          panel.grid.major=element_blank(), 
+          panel.grid.minor=element_blank(),
+          axis.line = element_line(colour="gray"))
+      )
+    )
+  )
+
+# includes all intersections
+ak_upset_full <- 
+  upset(
+  ak_full_df_upset, 
+  host_names, 
+  name = '',
+  min_size=1,
+  width_ratio = 0.1,
+  base_annotations = list(
+    'Intersection size'=intersection_size(
+      text=list(size=3, vjust=-0.1, hjust=0, angle=60), 
+      text_aes = aes(
+      label=paste0(signif(intersection_size/nrow(ak_full_mat_pa) * 100, digits=2), '%')))), 
+  themes = upset_modify_themes(
+    list(
+        'Intersection size'=theme(
+          panel.grid.major=element_blank(), 
+          panel.grid.minor=element_blank(),
+          axis.line = element_line(colour="gray"))
+      )
+    )
+  )
+
+```
+
+
+## Nestedness Plot
+
+```{r}
+
+# Make a copy of presence absence matrix for nestedness
+ak_full_mat_nest <- as(ak_full_mat_pa, "matrix")
+
+# Tranpose matrix so that ASVs are columns and hosts are rows
+ak_full_mat_nest <- t(ak_full_mat_nest)
+
+# Ordered by what looks to be more nested visually (not by size)
+ak_nest_order <- c("Soil",
+                   "Grass root",
+                   "Akala root",
+                   "Koa root",
+                   "Olapa root",
+                   "Ohia root",
+                   "Kolea root")
+
+ak_full_mat_nest <- ak_full_mat_nest[ak_nest_order,]
+
+
+
+# count how many samples each ASV is in
+ak_spread_scores <- colSums(ak_full_mat_nest)
+
+# assign each ASV a weighted score based on its presence in different sample types
+# lower sample types get a higher score to give figure a right-aligned nested structure
+ak_rank_scores <- apply(ak_full_mat_nest, MARGIN=2, function(x) sum(x * rev(seq_along(x))))
+
+ak_composite_score <- data.table(OTU_ID = names(ak_spread_scores),
+                                spread_score = ak_spread_scores,
+                                rank_score = ak_rank_scores)
+
+ak_composite_score <- ak_composite_score[order(rank_score, spread_score)]
+
+ak_asv_order <- ak_composite_score$OTU_ID
+
+ak_full_mat_nest <- ak_full_mat_nest[, ak_asv_order]
+
+ak_nest_plot <- heatmap(ak_full_mat_nest, Colv=NA, Rowv=NA, labCol=NA, margins = c(5,5))
+
+```
+
+
+
+
+
+
+
+

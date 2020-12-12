@@ -1,0 +1,156 @@
+---
+title: "Rarefy"
+output: html_notebook
+---
+
+## Goal
+Make smaller phyloseq objects based on sample type and merge by plot so the root objects can be rarefied.
+
+```{r}
+
+library(dplyr)
+library(tibble)
+
+```
+
+## Data Housekeeping
+
+```{r}
+
+readRDS("../intermediate_files/unrarefied_physeq.rds")
+
+# Remove all pilo samples, root and soil
+sample_data(unrarefied_physeq) <- sample_data(unrarefied_physeq)[
+                                    (sample_data(unrarefied_physeq)$host!="Coprosma rhynchocarpa"),]
+
+# Fix Rubus 'hawaiensis' spelling 
+sample_data(unrarefied_physeq)$host <- sub(pattern = "Rubus hawaiiensis", 
+                                       replacement = "Rubus hawaiensis", 
+                                       x = sample_data(unrarefied_physeq)$host)
+
+```
+
+## Add NewSampleType Column to sample_data
+
+```{r}
+
+# Make data frame from sample data
+sd_df <- as.data.frame(as(sample_data(unrarefied_physeq), "data.frame"))
+
+# Change the value in new column NewSampleType according to existing values for SampleType and host. All right hand side must be same type, so NA_character_ must be used, not just NA
+sd_df <- sd_df %>% 
+  rownames_to_column('sampleid') %>%
+  
+  mutate(NewSampleType = case_when(
+  (SampleType=="roots" & host=="Acacia koa") ~ "Koa root",
+  (SampleType=="roots" & host=="Cheirodendron trigynum") ~ "Olapa root",
+  (SampleType=="roots" & host=="Myrsine lessertiana") ~ "Kolea root",
+  (SampleType=="roots" & host=="Rubus hawaiensis") ~ "Akala root",
+  (SampleType=="roots" & host=="Metrosideros polymorpha") ~ "Ohia root",
+  (SampleType=="roots" & host=="Grass") ~ "Grass root",
+  (SampleType=="soil") ~ "Soil",
+  TRUE ~ NA_character_)) %>% column_to_rownames('sampleid')
+
+
+sample_data(unrarefied_physeq)$NewSampleType <- sample_data(sd_df)$NewSampleType
+
+```
+
+## Subset samples
+
+```{r}
+
+host_names <- unique(sd_df$NewSampleType)
+saveRDS(host_names, "../intermediate_files/host_names.rds")
+
+host_subsets <- list()
+
+# subset by host, remove empty taxa, and merge by plot
+for (a_host in host_names) {
+  a_subset <- subset_samples(unrarefied_physeq, NewSampleType==a_host)
+  a_subset <- prune_taxa(taxa_sums(a_subset) > 0, a_subset)
+  host_subsets[[a_host]] <- merge_samples(a_subset, "Plot")
+}
+
+```
+
+
+## Find lowest plot sum for root samples
+
+```{r}
+
+plot_sums <- list()
+
+# View sequence sums per plot
+# Ohia had the lowest number, so that is what was used to rarefy both root sets
+
+for (a_host in host_names) {
+  plot_sums[[a_host]] <- rowSums(otu_table(host_subsets[[a_host]])) 
+}
+
+
+sums2plot <- unlist(plot_sums)
+hist(sums2plot, breaks = 50)
+
+# there are 2 outlier kolea plots to delete
+# the next lowest plot sum is in ohia (11258)
+sort(sums2plot)
+
+```
+
+## Removing Outliers
+
+```{r}
+
+# Remove 2 plots from kolea (> 10000)
+plots_to_remove <- c("AK2", "RO6")
+
+host_subsets$`Kolea root` <-
+  subset_samples(host_subsets$`Kolea root`,
+                 !(sample_names(host_subsets$`Kolea root`) %in% plots_to_remove))
+
+host_subsets$`Kolea root` <- 
+  prune_taxa(taxa_sums(host_subsets$`Kolea root`) > 0, host_subsets$`Kolea root`)
+
+
+```
+
+## Rarefy!
+
+```{r}
+
+# run again 
+for (a_host in host_names) {
+  plot_sums[[a_host]] <- rowSums(otu_table(host_subsets[[a_host]])) 
+}
+
+# plot sums after removing kolea outliers
+sums4rarefy <- unlist(plot_sums)
+
+
+rarefied_physeqs <- list()
+
+# rarefy. 
+for (a_host in host_names) {
+  rarefied_physeqs[[a_host]] <- rarefy_even_depth(host_subsets[[a_host]],
+                                             sample.size = min(sums4rarefy),
+                                             rngseed = 1)
+}
+
+# Change soil physeq back to unrarefied version
+rarefied_physeqs$Soil <- host_subsets$Soil
+
+saveRDS(rarefied_physeqs, "../intermediate_files/rarefied_physeqs.rds")
+
+```
+
+## For Later
+
+```{r}
+
+full_tax_table_df <- as.data.frame(tax_table(unrarefied_physeq))
+
+saveRDS(full_tax_table_df, "../intermediate_files/full_tax_table_df.rds")
+
+```
+

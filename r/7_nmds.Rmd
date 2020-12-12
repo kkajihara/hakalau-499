@@ -1,0 +1,111 @@
+---
+title: "nmds"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+
+```{r}
+
+library(tibble)
+library(dplyr)
+
+```
+
+## Things Needed
+
+```{r}
+
+# matrix of ASV counts by host
+readRDS("../intermediate_files/ak_full_mat.rds")
+
+# matrix of ASV counts by host
+readRDS("../intermediate_files/ro_full_mat.rds")
+
+```
+
+# NMDS by Host/Soil
+
+```{r}
+
+# takes the merged otu table with hosts as columns and ASVs as rows and 
+# formats it for metaMDS()
+nmds_df_prep <- function(merged_otu_table, habitat) {
+  # flip axes so ASVs are columns and hosts are rows
+  nmds_table <- t(merged_otu_table)
+  # convert to data frame
+  nmds_table <- as.data.frame(nmds_table)
+  # change host names from row names into its own column
+  # add another column after the host column listing the habitat
+  nmds_table <- nmds_table %>% rownames_to_column('Host') %>%
+    add_column(Hab = rep(habitat, nrow(nmds_table)), .after=1)
+}
+
+ak_nmds_table <- nmds_df_prep(ak_full_mat, "AK")
+ro_nmds_table <- nmds_df_prep(ro_full_mat, "RO")
+
+```
+
+## rbind
+
+```{r}
+# DETACH after if using dplyr later
+library(plyr)
+
+# merge the two habitat tables, adding NAs where ASVs are not present in a given host/soil
+full_nmds_table <- rbind.fill(ak_nmds_table, ro_nmds_table)
+
+# convert NAs to 0s
+full_nmds_table[is.na(full_nmds_table)] <- 0
+
+```
+
+## nmds
+
+```{r}
+
+library(vegan)
+library(ggplot2)
+
+# take only the ASV columns (not the sample or habitat columns)
+nmds_otu_table <- full_nmds_table[,3:ncol(full_nmds_table)]
+
+# convert to matrix
+nmds_otu_table <- as.matrix(nmds_otu_table)
+
+
+set.seed(123)
+# make NMDS
+nmds <- metaMDS(nmds_otu_table, distance = "bray")
+
+# extract NMDS scores into a data frame
+nmds_data_scores <- as.data.frame(scores(nmds))
+
+# add in sample column from original merged df
+nmds_data_scores$Host <- full_nmds_table$Host
+
+# add in habitat column from original merged df
+nmds_data_scores$Habitat <- full_nmds_table$Hab
+
+# create nmds plot. Get stress value from 'nmds'
+nmds_plot <- ggplot(nmds_data_scores, aes(x = NMDS1, y = NMDS2)) + 
+    geom_point(data = nmds_data_scores, size = 4, aes(shape = Habitat, colour = Host))+ 
+    stat_ellipse(aes(x = NMDS1, y = NMDS2, group = Habitat), level = 0.50) +
+    theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
+    axis.text.x = element_text(colour = "black", face = "bold", size = 12), 
+    legend.text = element_text(size = 12, face ="bold", colour ="black"), 
+    legend.position = "right", axis.title.y = element_text(face = "bold", size = 14), 
+    axis.title.x = element_text(face = "bold", size = 14, colour = "black"), 
+    legend.title = element_text(size = 14, colour = "black", face = "bold"), 
+    panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+    legend.key=element_blank()) + 
+    annotate("text", label="stress=0.103", x=0.85, y=0.45, colour="black") +
+    labs(x = "NMDS1", y = "NMDS2", shape = "Habitat", colour = "Host") +
+    scale_color_brewer(palette = "Set2")
+
+
+```

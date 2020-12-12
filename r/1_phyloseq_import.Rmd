@@ -1,0 +1,88 @@
+---
+title: "Phyloseq import"
+date: "10/19/2020"
+output: html_document
+---
+
+## Goal
+Get cleaned data from Qiime2 into phyloseq.
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+### Packages
+
+
+```{r}
+
+library(phyloseq)
+library(qiime2R)
+
+```
+
+
+## Data Import
+
+Using the qiime2R package by jbisanz on Github. Reads in Qiime2 .qza files as is without needing to convert to .biom or .txt.
+
+The data coming from Qiime2 has gone through quality control and had chimeras and bad quality reads removed. This is the full soil and root data set classified with the MaarjAM curated AMF database at 95%, 90%, and 80% ID at 90% query coverage each time. A final classification was done using AMF SSU data downloaded from NCBI GenBank at 80% ID, 90% query coverage.
+
+
+```{r}
+
+## This is more to access the qiime artifact data if desired, doesn't actually have to do with the phyloseq object yet
+
+# Read in feature table
+asvs <- read_qza("../data/merged-glom-only-final-no-negs.qza")
+
+# Read in metadata
+metadata <- read.table(file="../data/haka-metadata.tsv", sep="\t", header=TRUE, stringsAsFactors = TRUE)
+
+# tree
+tree <- read_qza("...data/rooted-tree.qza")
+
+# Read in taxonomy
+taxonomy <- read_qza(file="../data/total-merged-classification.qza")
+
+
+```
+
+
+## Create phyloseq object
+
+```{r}
+
+# Create phyloseq object
+unrarefied_physeq <- qza_to_phyloseq(
+  features="../data/merged-glom-only-final-no-negs.qza", 
+  tree="../data/rooted-tree.qza", 
+  taxonomy="../data/total-merged-classification.qza", 
+  metadata="../data/haka-metadata.tsv")
+
+
+unrarefied_physeq
+
+saveRDS(unrarefied_physeq, "../intermediate_files/unrarefied_physeq.rds")
+
+```
+
+
+### Change ASV names for convenience purposes
+
+```{r}
+# Change the taxa names to "ASV1, ASV2, etc." for working convenience
+taxa_names(unrarefied_physeq) <- paste0("ASV", seq(ntaxa(unrarefied_physeq)))
+
+```
+
+
+
+
+
+
+

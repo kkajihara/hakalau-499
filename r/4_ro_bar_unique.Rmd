@@ -1,0 +1,134 @@
+---
+title: "ro_bar_unique"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+
+```{r}
+
+library(tibble)
+library(dplyr)
+
+```
+
+## Things Needed
+
+```{r}
+
+# matrix of ASV counts by host
+readRDS("../intermediate_files/ro_full_mat.rds")
+
+# taxonomy table from full physeq object 
+readRDS("../intermediate_files/full_tax_table_df.rds")
+
+# a vector of our host names
+readRDS("../intermediate_files/host_names.rds")
+
+
+```
+
+
+## Data frame things
+
+```{r}
+
+# rename and convert to data frame
+ro_barplot_df <- as.data.frame(ro_full_mat)
+
+# format taxonomy table
+full_tax_table_df <- full_tax_table_df %>% rownames_to_column("ASV")
+
+# where family = Paraglomerales, change to Glomeromycotina
+# Paraglomerales is an order, not a family. Issue stems from NCBI taxonomy.
+full_tax_table_df$Family <- gsub("Paraglomerales", "Glomeromycotina", full_tax_table_df$Family)
+
+```
+
+## Isolate Host-specific ASVs
+
+```{r}
+
+ro_unique_asvs <- list()
+
+
+for (a_host in host_names) {
+  # subset host specific ASVs by host. Counts for all other hosts should be 0, 
+  # so the rowsum == the host count
+  ro_unique <- ro_barplot_df[rowSums(ro_barplot_df)==ro_barplot_df[[a_host]],]
+  # make asv rownames into a column
+  ro_unique <- rownames_to_column(ro_unique, "ASV")
+  # make a new df with asv names and host sample asv counts as columns
+  ro_unique <- select(ro_unique, ASV, a_host)
+  # take sum of all unique host sample sequences
+  total_host_sum <- sum(ro_barplot_df[[a_host]])
+  # make new relative abundance column by dividing unique count by total
+  ro_unique <- mutate(ro_unique, rel_abun=((ro_unique[[a_host]] / total_host_sum) * 100))
+  # make new column taking family from tax_table where asv names match in both dfs
+  ro_unique$Family <- full_tax_table_df$Family[match(ro_unique$ASV, full_tax_table_df$ASV)]
+  # make new column with host name filling all cells
+  ro_unique$Host <- rep(a_host, nrow(ro_unique))
+  # make new column with ASV total per host filling all cells
+  ro_unique$Total <- rep(sum(ro_unique[[a_host]]), nrow(ro_unique))
+  # change host colname for future rbind
+  colnames(ro_unique)[2] <- "Count"
+  # save resulting df in our list
+  ro_unique_asvs[[a_host]] <- ro_unique
+}
+
+
+```
+
+## rbind
+
+```{r}
+
+ro_total_unique_rbind <- do.call("rbind", ro_unique_asvs)
+
+saveRDS(ro_total_unique_rbind, "../intermediate_files/ro_total_unique_rbind.rds")
+write.csv(ro_total_unique_rbind, "../intermediate_files/ro_total_unique_rbind.csv")
+
+## Getting ASV counts for bar labels
+
+# make a copy
+ro_total_rbind_sums <- ro_total_unique_rbind
+
+# detach plyr if using. summarise() in plyr does something different
+ro_total_rbind_sums <- ro_total_rbind_sums %>% group_by(Host) %>% summarise(count=length(ASV), abund=sum(rel_abun))
+
+
+```
+
+## Plot
+
+```{r}
+library(ggplot2)
+
+ro_unique_bar <- ggplot(ro_total_unique_rbind, aes(x=Host, fill=Family, y=rel_abun)) +
+  geom_bar(stat="identity", position="stack") +
+  theme(axis.text.x = element_text(angle=90, size=14, colour="black", vjust=0.5, hjust=1, face="bold"), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_blank(),
+        axis.line = element_line(colour="gray"),
+        axis.title.y = element_text(size=16, face="bold"),
+        legend.title = element_text(size=16, face="bold"),
+        legend.text = element_text(size=12, face="bold", colour="black"),
+        axis.text.y = element_text(colour="black", size=12, face="bold")) +
+  ylim(0,9) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  labs(x = "", y = "Relative Abundance (%)", fill="Family") +
+  geom_text(data=ro_total_rbind_sums, aes(x=Host, y=abund, label=count), inherit.aes = F, vjust=-1) +
+  scale_fill_manual(values = c("Acaulosporaceae" = "#9e0142",
+                               "Ambisporaceae" = "#d53e4f",
+                               "Archaeosporaceae" = "#f46d43",
+                               "Claroideoglomeraceae" = "#fdae61",
+                               "Diversisporaceae" = "#fee08b",
+                               "Gigasporaceae" = "#e6f598",
+                               "Glomeraceae" = "#abdda4",
+                               "Glomeromycotina" = "#66c2a5",
+                               "Paraglomeraceae" = "#3288bd"))
+
+```
+
