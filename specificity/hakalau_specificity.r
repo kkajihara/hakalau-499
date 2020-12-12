@@ -7,9 +7,7 @@ library(ape)
 	full_otutable <- read.delim("specificity/hakalau_otu_table.csv", sep=",", header=TRUE, row.names=1)
 	# has 1323 rows (samples - AK1AC1.r, etc.) and 33 columns (habitat type, etc.)
 	metadata <- read.delim("specificity/haka-metadata.tsv", sep="\t", header=TRUE, stringsAsFactors=FALSE)
-	# fix rubus 'hawaiensis' spelling so tree tip label is found in metadata
-	metadata$host <- sub(pattern = "Rubus hawaiiensis", replacement = "Rubus hawaiensis", 
-	                     x =metadata$host)
+	
 	
 	haka_supertree<- ape::read.tree("specificity/supertree_kacie.tre")
 	# get rid of underscores in tree
