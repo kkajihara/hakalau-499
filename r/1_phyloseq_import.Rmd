@@ -75,7 +75,7 @@ unrarefied_physeq
 # Change the taxa names to "ASV1, ASV2, etc." for working convenience
 taxa_names(unrarefied_physeq) <- paste0("ASV", seq(ntaxa(unrarefied_physeq)))
 
-saveRDS(unrarefied_physeq, "../intermediate_files/unrarefied_physeq.rds")
+saveRDS(unrarefied_physeq, "../intermediate_files/rds/unrarefied_physeq.rds")
 
 ```
 

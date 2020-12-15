@@ -13,8 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # read in host_names, rarefied_physeqs
 
-readRDS("../intermediate_files/host_names.rds")
-readRDS("../intermediate_files/rarefied_physeqs.rds")
+readRDS("../intermediate_files/rds/host_names.rds")
+readRDS("../intermediate_files/rds/rarefied_physeqs.rds")
 
 ```
 
@@ -82,8 +82,8 @@ ro_full_mat <- as(r, "matrix")
 ro_full_mat[is.na(ro_full_mat)] <- 0
 
 # save for later
-saveRDS(ro_full_mat, "../intermediate_files/ro_full_mat.rds")
-write.csv(ro_full_mat, "../intermediate_files/ro_full_mat.csv")
+saveRDS(ro_full_mat, "../intermediate_files/rds/ro_full_mat.rds")
+write.csv(ro_full_mat, "../intermediate_files/csv/ro_full_mat.csv")
 
 ```
 
@@ -99,8 +99,8 @@ ro_full_mat_pa <- ro_full_mat
 ro_full_mat_pa[ro_full_mat_pa > 0] <- 1
 
 # save for later
-saveRDS(ro_full_mat_pa, "../intermediate_files/ro_full_mat_pa.rds")
-write.csv(ro_full_mat_pa, "../intermediate_files/ro_full_mat_pa.csv")
+saveRDS(ro_full_mat_pa, "../intermediate_files/rds/ro_full_mat_pa.rds")
+write.csv(ro_full_mat_pa, "../intermediate_files/csv/ro_full_mat_pa.csv")
 
 ```
 
@@ -120,11 +120,12 @@ ro_full_df_upset <- as.data.frame(ro_full_mat_pa)
 # change min_size to only show intersections >1%
 ro_upset <- 
   upset(
-  ro_full_mat_upset, 
+  ro_full_df_upset, 
   host_names, 
   name = '',
   min_size=11,
   width_ratio = 0.2,
+  wrap = TRUE,
   base_annotations = list(
     'Intersection size'=intersection_size(
       text=list(size=3, vjust=-0.5), 
@@ -135,19 +136,26 @@ ro_upset <-
         'Intersection size'=theme(
           panel.grid.major=element_blank(), 
           panel.grid.minor=element_blank(),
+          plot.margin = unit(c(1,1,1,1), "cm"),
           axis.line = element_line(colour="gray"))
       )
     )
-  )
+  ) + ggtitle('B) Remnant Forest')
+
+library(patchwork)
+pdf("figures/upset-test.pdf", width = 10, height=10)
+(ak_upset | ro_upset) + plot_layout(ncol=1, nrow=2)
+dev.off()
 
 # includes all intersections
 ro_upset_full <- 
   upset(
-  ro_full_mat_upset, 
+  ro_full_df_upset, 
   host_names, 
   name = '',
   min_size=1,
   width_ratio = 0.1,
+  wrap = TRUE,
   base_annotations = list(
     'Intersection size'=intersection_size(
       text=list(size=3, vjust=-0.1, hjust=0, angle=60), 
@@ -161,7 +169,7 @@ ro_upset_full <-
           axis.line = element_line(colour="gray"))
       )
     )
-  )
+  ) + ggtitle('Remnant Forest')
 
 ```
 

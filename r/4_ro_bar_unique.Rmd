@@ -21,13 +21,13 @@ library(dplyr)
 ```{r}
 
 # matrix of ASV counts by host
-readRDS("../intermediate_files/ro_full_mat.rds")
+readRDS("../intermediate_files/rds/ro_full_mat.rds")
 
 # taxonomy table from full physeq object 
-readRDS("../intermediate_files/full_tax_table_df.rds")
+readRDS("../intermediate_files/rds/full_tax_table_df.rds")
 
 # a vector of our host names
-readRDS("../intermediate_files/host_names.rds")
+readRDS("../intermediate_files/rds/host_names.rds")
 
 
 ```
@@ -90,8 +90,8 @@ for (a_host in host_names) {
 
 ro_total_unique_rbind <- do.call("rbind", ro_unique_asvs)
 
-saveRDS(ro_total_unique_rbind, "../intermediate_files/ro_total_unique_rbind.rds")
-write.csv(ro_total_unique_rbind, "../intermediate_files/ro_total_unique_rbind.csv")
+saveRDS(ro_total_unique_rbind, "../intermediate_files/rds/ro_total_unique_rbind.rds")
+write.csv(ro_total_unique_rbind, "../intermediate_files/csv/ro_total_unique_rbind.csv")
 
 ## Getting ASV counts for bar labels
 
@@ -109,18 +109,24 @@ ro_total_rbind_sums <- ro_total_rbind_sums %>% group_by(Host) %>% summarise(coun
 ```{r}
 library(ggplot2)
 
-ro_unique_bar <- ggplot(ro_total_unique_rbind, aes(x=Host, fill=Family, y=rel_abun)) +
+
+pdf("figures/ro-unique-bar.pdf", paper = "USr")  
+ro_unique_bar <-
+  ggplot(ro_total_unique_rbind, aes(x=Host, fill=Family, y=rel_abun)) +
   geom_bar(stat="identity", position="stack") +
-  theme(axis.text.x = element_text(angle=90, size=14, colour="black", vjust=0.5, hjust=1, face="bold"), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_blank(),
-        axis.line = element_line(colour="gray"),
-        axis.title.y = element_text(size=16, face="bold"),
-        legend.title = element_text(size=16, face="bold"),
-        legend.text = element_text(size=12, face="bold", colour="black"),
-        axis.text.y = element_text(colour="black", size=12, face="bold")) +
-  ylim(0,9) +
-  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
-  labs(x = "", y = "Relative Abundance (%)", fill="Family") +
+  theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1, size=12, colour="black"), legend.box.margin = margin(0,0,0,1, "cm"), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_blank(), 
+        axis.line = element_line(colour="black"),
+        axis.title.x = element_text(size=16),
+        axis.title.y = element_text(size=16),
+        legend.title = element_text(size=16),
+        legend.text = element_text(size=12, colour="black"),
+        axis.text.y = element_text(size=12, colour="black")) +
+  ylim(0,8) +
+  theme(plot.margin = unit(c(0,0,0,0), "cm")) +
+  labs(x = "\nHost", y = "", fill="Family") +
   geom_text(data=ro_total_rbind_sums, aes(x=Host, y=abund, label=count), inherit.aes = F, vjust=-1) +
+  ggtitle("\nRemnant Forest") +
+  theme(plot.title=element_text(hjust=0.5, vjust=0.5, size = 16)) +
   scale_fill_manual(values = c("Acaulosporaceae" = "#9e0142",
                                "Ambisporaceae" = "#d53e4f",
                                "Archaeosporaceae" = "#f46d43",
@@ -130,6 +136,13 @@ ro_unique_bar <- ggplot(ro_total_unique_rbind, aes(x=Host, fill=Family, y=rel_ab
                                "Glomeraceae" = "#abdda4",
                                "Glomeromycotina" = "#66c2a5",
                                "Paraglomeraceae" = "#3288bd"))
+dev.off()
 
+pdf("figures/combined_unique.pdf", paper="USr")
+
+
+pdf("figures/combined-unique-barplot.pdf", paper="USr", width=10, height=5, onefile = F)
+ggarrange(ak_unique_bar, ro_unique_bar, labels=c("A)", "B)"), hjust=-1.5, vjust = 3, common.legend = TRUE, legend = "right")
+dev.off()
 ```
 

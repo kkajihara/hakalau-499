@@ -17,8 +17,8 @@ Use subset_samples to keep only AK or RO plots.
 
 # read in host_names, rarefied_physeqs
 
-readRDS("../intermediate_files/host_names.rds")
-readRDS("../intermediate_files/rarefied_physeqs.rds")
+readRDS("../intermediate_files/rds/host_names.rds")
+readRDS("../intermediate_files/rds/rarefied_physeqs.rds")
 
 ```
 
@@ -88,8 +88,8 @@ ak_full_mat <- as(a, "matrix")
 ak_full_mat[is.na(ak_full_mat)] <- 0
 
 # save for later
-saveRDS(ak_full_mat, "../intermediate_files/ak_full_mat.rds")
-write.csv(ak_full_mat, "../intermediate_files/ak_full_mat.csv")
+saveRDS(ak_full_mat, "../intermediate_files/rds/ak_full_mat.rds")
+write.csv(ak_full_mat, "../intermediate_files/csv/ak_full_mat.csv")
 
 ```
 
@@ -105,8 +105,8 @@ ak_full_mat_pa <- ak_full_mat
 ak_full_mat_pa[ak_full_mat_pa > 0] <- 1
 
 # save for later
-saveRDS(ak_full_mat_pa, "../intermediate_files/ak_full_mat_pa.rds")
-write.csv(ak_full_mat_pa, "../intermediate_files/ak_full_mat_pa.csv")
+saveRDS(ak_full_mat_pa, "../intermediate_files/rds/ak_full_mat_pa.rds")
+write.csv(ak_full_mat_pa, "../intermediate_files/csv/ak_full_mat_pa.csv")
 
 ```
 
@@ -129,8 +129,9 @@ ak_upset <-
   ak_full_df_upset, 
   host_names, 
   name = '',
-  min_size=10,
+  min_size=11,
   width_ratio = 0.2,
+  wrap = TRUE,
   base_annotations = list(
     'Intersection size'=intersection_size(
       text=list(size=3, vjust=-0.5), 
@@ -141,10 +142,15 @@ ak_upset <-
         'Intersection size'=theme(
           panel.grid.major=element_blank(), 
           panel.grid.minor=element_blank(),
+          plot.margin = unit(c(1,1,1,1), "cm"),
           axis.line = element_line(colour="gray"))
       )
     )
-  )
+  ) + ggtitle('A) Restored Forest')
+
+pdf("figures/ak-upset-trimmed.pdf", paper = "USr", width=9, height=8)
+ak_upset
+dev.off()
 
 # includes all intersections
 ak_upset_full <- 

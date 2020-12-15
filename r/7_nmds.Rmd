@@ -21,10 +21,10 @@ library(dplyr)
 ```{r}
 
 # matrix of ASV counts by host
-readRDS("../intermediate_files/ak_full_mat.rds")
+readRDS("../intermediate_files/rds/ak_full_mat.rds")
 
 # matrix of ASV counts by host
-readRDS("../intermediate_files/ro_full_mat.rds")
+readRDS("../intermediate_files/rds/ro_full_mat.rds")
 
 ```
 
@@ -95,17 +95,21 @@ nmds_data_scores$Habitat <- full_nmds_table$Hab
 nmds_plot <- ggplot(nmds_data_scores, aes(x = NMDS1, y = NMDS2)) + 
     geom_point(data = nmds_data_scores, size = 4, aes(shape = Habitat, colour = Host))+ 
     stat_ellipse(aes(x = NMDS1, y = NMDS2, group = Habitat), level = 0.50) +
-    theme(axis.text.y = element_text(colour = "black", size = 12, face = "bold"), 
-    axis.text.x = element_text(colour = "black", face = "bold", size = 12), 
-    legend.text = element_text(size = 12, face ="bold", colour ="black"), 
-    legend.position = "right", axis.title.y = element_text(face = "bold", size = 14), 
-    axis.title.x = element_text(face = "bold", size = 14, colour = "black"), 
-    legend.title = element_text(size = 14, colour = "black", face = "bold"), 
+    theme(axis.text.y = element_text(colour = "black", size = 12), 
+    axis.text.x = element_text(colour = "black", size = 12), 
+    legend.text = element_text(size = 12, colour ="black"), 
+    legend.position = "right", axis.title.y = element_text(size = 14), 
+    axis.title.x = element_text(size = 14, colour = "black"), 
+    legend.title = element_text(size = 14, colour = "black"), 
     panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
     legend.key=element_blank()) + 
     annotate("text", label="stress=0.103", x=0.85, y=0.45, colour="black") +
     labs(x = "NMDS1", y = "NMDS2", shape = "Habitat", colour = "Host") +
     scale_color_brewer(palette = "Set2")
+
+pdf("figures/nmds.pdf", width=6.5, height=4)
+nmds_plot
+dev.off()
 
 
 ```

@@ -22,18 +22,18 @@ library(reshape2)
 ```{r}
 
 # data frames of unique ASVs
-readRDS("../intermediate_files/ak_total_unique_rbind.rds")
-readRDS("../intermediate_files/ro_total_unique_rbind.rds")
+readRDS("../intermediate_files/rds/ak_total_unique_rbind.rds")
+readRDS("../intermediate_files/rds/ro_total_unique_rbind.rds")
 
 # data frames of shared ASVs
-readRDS("../intermediate_files/ak_total_shared_rbind.rds")
-readRDS("../intermediate_files/ro_total_shared_rbind.rds")
+readRDS("../intermediate_files/rds/ak_total_shared_rbind.rds")
+readRDS("../intermediate_files/rds/ro_total_shared_rbind.rds")
 
 # matrix of ASV counts by host
-readRDS("../intermediate_files/ak_full_mat.rds")
+readRDS("../intermediate_files/rds/ak_full_mat.rds")
 
 # matrix of ASV counts by host
-readRDS("../intermediate_files/ro_full_mat.rds")
+readRDS("../intermediate_files/rds/ro_full_mat.rds")
 
 ```
 
